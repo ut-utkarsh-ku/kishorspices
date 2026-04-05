@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Kishor Spices</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--saffron:#E8820C;--chili:#C0392B;--cream:#FDF6EC;--bark:#3D2B1F;--muted:#7A6255;--bg:#F5F0E8;--white:#ffffff;--sidebar:220px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--bark);display:flex;min-height:100vh;font-size:14px}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--bark);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+.sb-logo{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.sb-logo-text{font-family:'Playfair Display',serif;font-size:17px;color:#fff}
+.sb-logo-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+.sb-section{padding:12px 0 4px;font-size:10px;font-weight:600;letter-spacing:1.5px;color:rgba(255,255,255,0.3);padding-left:16px;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:rgba(255,255,255,0.55);cursor:pointer;transition:all 0.15s;font-size:13px;border-left:3px solid transparent}
+.sb-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.9)}
+.sb-item.active{background:rgba(232,130,12,0.15);color:#fff;border-left-color:var(--saffron)}
+.sb-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--chili);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:50px}
+.sb-footer{margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,0.1)}
+.sb-footer a{display:block;text-align:center;background:rgba(232,130,12,0.2);color:var(--saffron);border-radius:8px;padding:9px;text-decoration:none;font-size:13px;font-weight:500;transition:background 0.2s}
+.sb-footer a:hover{background:rgba(232,130,12,0.35)}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid rgba(232,130,12,0.1);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-left h1{font-size:17px;font-weight:500;color:var(--bark)}
+.topbar-left p{font-size:12px;color:var(--muted);margin-top:1px}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.notify-btn{background:rgba(232,130,12,0.08);border:1px solid rgba(232,130,12,0.2);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--saffron);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500}
+.notify-btn:hover{background:rgba(232,130,12,0.15)}
+.live-dot{width:8px;height:8px;background:#22C55E;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* PANELS */
+.panel{display:none;padding:24px;flex-direction:column;gap:20px}
+.panel.active{display:flex}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.stat{background:#fff;border-radius:12px;padding:16px;border:1px solid rgba(232,130,12,0.08)}
+.stat-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:500;color:var(--bark)}
+.stat-delta{font-size:12px;margin-top:4px;color:#22C55E}
+.stat-delta.dn{color:var(--chili)}
+
+/* SECTION CARD */
+.card{background:#fff;border-radius:12px;border:1px solid rgba(232,130,12,0.08);overflow:hidden}
+.card-head{padding:14px 18px;border-bottom:1px solid rgba(232,130,12,0.08);display:flex;align-items:center;justify-content:space-between}
+.card-head h3{font-size:14px;font-weight:500;color:var(--bark)}
+.card-body{padding:16px 18px}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;background:var(--bg);border-bottom:1px solid rgba(232,130,12,0.1)}
+.data-table td{padding:11px 12px;border-bottom:1px solid rgba(232,130,12,0.06);color:var(--bark);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(232,130,12,0.03)}
+
+/* BADGES */
+.badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:50px;display:inline-block}
+.b-live{background:#DCFCE7;color:#15803D}
+.b-draft{background:#FEF9C3;color:#854D0E}
+.b-new{background:#DBEAFE;color:#1D4ED8}
+.b-shipped{background:#F3E8FF;color:#7E22CE}
+.b-delivered{background:#DCFCE7;color:#15803D}
+.b-hot{background:#FEE2E2;color:#991B1B}
+.b-selling{background:#FFF7ED;color:#C2410C}
+.b-bestseller{background:#F3E8FF;color:#7E22CE}
+.b-premium{background:#FDF4FF;color:#86198F}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all 0.15s}
+.btn-primary{background:var(--saffron);color:#fff}
+.btn-primary:hover{background:var(--chili)}
+.btn-secondary{background:transparent;border:1px solid rgba(232,130,12,0.3);color:var(--saffron)}
+.btn-secondary:hover{background:rgba(232,130,12,0.08)}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:6px}
+.btn-danger{background:transparent;border:1px solid #FCA5A5;color:var(--chili)}
+.btn-danger:hover{background:#FEE2E2}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:12px;font-weight:500;color:var(--muted)}
+.form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:1px solid rgba(232,130,12,0.2);border-radius:8px;font-size:13px;color:var(--bark);font-family:'DM Sans',sans-serif;background:#fff;outline:none;transition:border-color 0.2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--saffron)}
+.form-group textarea{resize:vertical;min-height:80px}
+
+/* MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto}
+.modal h2{font-size:17px;font-weight:500;margin-bottom:18px;color:var(--bark)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+/* CHAT PANEL */
+.chat-layout{display:grid;grid-template-columns:260px 1fr;height:500px;border:1px solid rgba(232,130,12,0.1);border-radius:12px;overflow:hidden;background:#fff}
+.chat-list{border-right:1px solid rgba(232,130,12,0.08);overflow-y:auto}
+.chat-list-item{padding:12px 14px;cursor:pointer;border-bottom:1px solid rgba(232,130,12,0.06);transition:background 0.15s}
+.chat-list-item:hover,.chat-list-item.active{background:rgba(232,130,12,0.05)}
+.chat-list-item .name{font-size:13px;font-weight:500;color:var(--bark)}
+.chat-list-item .preview{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-list-item .time{font-size:11px;color:var(--muted);float:right}
+.unread-dot{width:8px;height:8px;background:var(--saffron);border-radius:50%;float:right;margin-top:4px}
+.chat-main{display:flex;flex-direction:column}
+.chat-header{padding:12px 16px;border-bottom:1px solid rgba(232,130,12,0.08);display:flex;align-items:center;justify-content:space-between}
+.chat-msgs-area{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.cm{max-width:75%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5}
+.cm.customer{background:#F5F0E8;color:var(--bark);align-self:flex-start;border-bottom-left-radius:3px}
+.cm.admin{background:var(--saffron);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.cm.ai{background:#EEF2FF;color:#3730A3;align-self:flex-start;border-bottom-left-radius:3px}
+.cm-label{font-size:10px;color:var(--muted);margin-bottom:3px;display:block}
+.chat-reply-area{padding:10px;border-top:1px solid rgba(232,130,12,0.08);display:flex;gap:8px}
+.chat-reply-area input{flex:1;border:1px solid rgba(232,130,12,0.2);border-radius:8px;padding:8px 12px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif}
+.chat-reply-area input:focus{border-color:var(--saffron)}
+
+/* ANALYTICS BARS */
+.bar-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}
+.bar-track{flex:1;height:8px;background:var(--bg);border-radius:50px;overflow:hidden}
+.bar-fill{height:100%;background:var(--saffron);border-radius:50px;transition:width 0.5s}
+.bar-val{min-width:36px;text-align:right;color:var(--muted);font-size:12px}
+
+/* PRODUCT SEARCH */
+.search-bar{padding:10px 12px;border:1px solid rgba(232,130,12,0.2);border-radius:8px;font-size:13px;width:220px;outline:none;font-family:'DM Sans',sans-serif}
+.search-bar:focus{border-color:var(--saffron)}
+.tag-select{padding:8px 12px;border:1px solid rgba(232,130,12,0.2);border-radius:8px;font-size:13px;color:var(--bark);font-family:'DM Sans',sans-serif;cursor:pointer;background:#fff;outline:none}
+
+/* NOTIFY SETTINGS */
+.notify-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(232,130,12,0.06)}
+.notify-row:last-child{border-bottom:none}
+.notify-info h4{font-size:13px;font-weight:500;color:var(--bark);margin-bottom:2px}
+.notify-info p{font-size:12px;color:var(--muted)}
+.toggle{width:40px;height:22px;background:#D1D5DB;border-radius:50px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;border:none}
+.toggle.on{background:var(--saffron)}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform 0.2s}
+.toggle.on::after{transform:translateX(18px)}
+
+/* TOAST */
+.admin-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bark);color:#fff;padding:11px 22px;border-radius:50px;font-size:13px;z-index:900;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.admin-toast.show{opacity:1}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform 0.3s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .form-grid{grid-template-columns:1fr}
+  .chat-layout{grid-template-columns:1fr}
+  .chat-list{display:none}
+  .stat-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-text">Kishor Spices</div>
+    <div class="sb-logo-sub">Admin Dashboard</div>
+  </div>
+
+  <div class="sb-section">Overview</div>
+  <div class="sb-item active" onclick="showPanel('dashboard',this)"><span class="sb-icon">📊</span> Dashboard</div>
+
+  <div class="sb-section">Store</div>
+  <div class="sb-item" onclick="showPanel('products',this)"><span class="sb-icon">🌶️</span> Products</div>
+  <div class="sb-item" onclick="showPanel('orders',this)"><span class="sb-icon">📦</span> Orders <span class="sb-badge" id="newOrderBadge">2</span></div>
+
+  <div class="sb-section">Content</div>
+  <div class="sb-item" onclick="showPanel('blog',this)"><span class="sb-icon">✍️</span> Blog Posts</div>
+
+  <div class="sb-section">Customers</div>
+  <div class="sb-item" onclick="showPanel('visitors',this)"><span class="sb-icon">👥</span> Visitors & Data</div>
+  <div class="sb-item" onclick="showPanel('chat',this)"><span class="sb-icon">💬</span> Chat & Support</div>
+
+  <div class="sb-section">Settings</div>
+  <div class="sb-item" onclick="showPanel('notifications',this)"><span class="sb-icon">🔔</span> Notifications</div>
+
+  <div class="sb-footer">
+    <a href="../index.html" target="_blank">👁️ View Public Site</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="panelTitle">Dashboard</h1>
+      <p id="panelSub">Welcome back — here's what's happening today</p>
+    </div>
+    <div class="topbar-right">
+      <div class="live-dot" title="Site is live"></div>
+      <button class="notify-btn" onclick="testNotify()">📲 Test WhatsApp Alert</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="stat-row">
+      <div class="stat"><div class="stat-label">Today's visitors</div><div class="stat-val">348</div><div class="stat-delta">↑ 18% vs yesterday</div></div>
+      <div class="stat"><div class="stat-label">New orders today</div><div class="stat-val">6</div><div class="stat-delta">↑ 2 new since morning</div></div>
+      <div class="stat"><div class="stat-label">Active products</div><div class="stat-val" id="dash-products">40</div><div class="stat-delta">All live</div></div>
+      <div class="stat"><div class="stat-label">Blog posts</div><div class="stat-val" id="dash-posts">4</div><div class="stat-delta dn">1 draft pending</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <div class="card-head"><h3>Recent orders</h3><button class="btn btn-secondary btn-sm" onclick="showPanel('orders',document.querySelector('[onclick*=orders]'))">View all</button></div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="dash-orders"></table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Top products this week</h3></div>
+        <div class="card-body" id="dash-top"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="panel" id="panel-products">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input class="search-bar" type="text" placeholder="Search products..." oninput="filterProducts(this.value)">
+      <select class="tag-select" onchange="filterTag(this.value)">
+        <option value="">All tags</option>
+        <option value="hot">🔥 Hot</option>
+        <option value="new">✨ New</option>
+        <option value="selling">⚡ Selling Fast</option>
+        <option value="bestseller">⭐ Bestseller</option>
+        <option value="premium">💎 Premium</option>
+        <option value="">— No tag</option>
+      </select>
+      <select class="tag-select" onchange="filterStatus(this.value)">
+        <option value="">All status</option>
+        <option value="live">Live</option>
+        <option value="draft">Draft</option>
+      </select>
+      <button class="btn btn-primary" onclick="openProductModal(-1)" style="margin-left:auto">+ Add product</button>
+    </div>
+    <div class="card">
+      <div class="card-body" style="padding:0;overflow-x:auto">
+        <table class="data-table" id="productsTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="panel" id="panel-orders">
+    <div class="card">
+      <div class="card-head"><h3>All orders</h3><span style="font-size:12px;color:var(--muted)">Click an order to notify customer on WhatsApp</span></div>
+      <div class="card-body" style="padding:0;overflow-x:auto">
+        <table class="data-table" id="ordersTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOG -->
+  <div class="panel" id="panel-blog">
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="openBlogModal(-1)">+ New post</button></div>
+    <div class="card">
+      <div class="card-body" style="padding:0">
+        <table class="data-table" id="blogTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISITORS -->
+  <div class="panel" id="panel-visitors">
+    <div class="stat-row">
+      <div class="stat"><div class="stat-label">Today</div><div class="stat-val">348</div><div class="stat-delta">↑ 18%</div></div>
+      <div class="stat"><div class="stat-label">This week</div><div class="stat-val">2,140</div><div class="stat-delta">↑ 7%</div></div>
+      <div class="stat"><div class="stat-label">This month</div><div class="stat-val">8,920</div><div class="stat-delta">↑ 12%</div></div>
+      <div class="stat"><div class="stat-label">Conversion rate</div><div class="stat-val">4.2%</div><div class="stat-delta">↑ 0.5%</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <div class="card-head"><h3>Top pages visited</h3></div>
+        <div class="card-body">
+          <div class="bar-item"><span style="min-width:80px;font-size:12px">Home</span><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><span class="bar-val">90%</span></div>
+          <div class="bar-item"><span style="min-width:80px;font-size:12px">Shop</span><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><span class="bar-val">72%</span></div>
+          <div class="bar-item"><span style="min-width:80px;font-size:12px">Blog</span><div class="bar-track"><div class="bar-fill" style="width:48%"></div></div><span class="bar-val">48%</span></div>
+          <div class="bar-item"><span style="min-width:80px;font-size:12px">About</span><div class="bar-track"><div class="bar-fill" style="width:31%"></div></div><span class="bar-val">31%</span></div>
+          <div class="bar-item"><span style="min-width:80px;font-size:12px">Contact</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="bar-val">20%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Top products viewed</h3></div>
+        <div class="card-body">
+          <div class="bar-item"><span style="min-width:120px;font-size:12px">Garam Masala</span><div class="bar-track"><div class="bar-fill" style="width:85%"></div></div><span class="bar-val">85%</span></div>
+          <div class="bar-item"><span style="min-width:120px;font-size:12px">Turmeric</span><div class="bar-track"><div class="bar-fill" style="width:78%"></div></div><span class="bar-val">78%</span></div>
+          <div class="bar-item"><span style="min-width:120px;font-size:12px">House Masala</span><div class="bar-track"><div class="bar-fill" style="width:63%"></div></div><span class="bar-val">63%</span></div>
+          <div class="bar-item"><span style="min-width:120px;font-size:12px">Kesar Saffron</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bar-val">55%</span></div>
+          <div class="bar-item"><span style="min-width:120px;font-size:12px">Biryani Masala</span><div class="bar-track"><div class="bar-fill" style="width:44%"></div></div><span class="bar-val">44%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Recent customer sign-ups / enquiries</h3></div>
+      <div class="card-body" style="padding:0">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Contact</th><th>Interest</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Ramesh Kumar</td><td>9876543210</td><td>Bulk order</td><td>Apr 5</td><td><button class="btn btn-sm btn-secondary" onclick="waMsg('919876543210','Hello Ramesh ji! Thank you for your interest in Kishor Spices.')">WhatsApp</button></td></tr>
+            <tr><td>Priya Sharma</td><td>priya@email.com</td><td>Newsletter</td><td>Apr 4</td><td><button class="btn btn-sm btn-secondary">Email</button></td></tr>
+            <tr><td>Anjali Nair</td><td>9645678901</td><td>Product query</td><td>Apr 3</td><td><button class="btn btn-sm btn-secondary" onclick="waMsg('919645678901','Hello Anjali ji! We are happy to help with your query.')">WhatsApp</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="panel" id="panel-chat">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:-8px">Customers who messaged via the website chatbot. Reply manually or let AI suggest a reply.</div>
+    <div class="chat-layout">
+      <div class="chat-list">
+        <div class="chat-list-item active" onclick="loadChat(0,this)">
+          <span class="time">2m</span>
+          <div class="unread-dot"></div>
+          <div class="name">Ramesh Kumar</div>
+          <div class="preview">Do you ship to Pune?</div>
+        </div>
+        <div class="chat-list-item" onclick="loadChat(1,this)">
+          <span class="time">18m</span>
+          <div class="name">Priya Sharma</div>
+          <div class="preview">What's the price for bulk order?</div>
+        </div>
+        <div class="chat-list-item" onclick="loadChat(2,this)">
+          <span class="time">1h</span>
+          <div class="name">Mohammed Raza</div>
+          <div class="preview">My order KS-1038 hasn't arrived</div>
+        </div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-header">
+          <div>
+            <div style="font-size:14px;font-weight:500" id="chatCustomerName">Ramesh Kumar</div>
+            <div style="font-size:12px;color:var(--muted)">9876543210 • Website chat</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-secondary" onclick="aiSuggest()">✨ AI Suggest Reply</button>
+            <button class="btn btn-sm btn-secondary" onclick="openWhatsApp()">📲 Switch to WhatsApp</button>
+          </div>
+        </div>
+        <div class="chat-msgs-area" id="chatArea"></div>
+        <div class="chat-reply-area">
+          <input type="text" id="adminReplyInput" placeholder="Type your reply..." onkeydown="if(event.key==='Enter')adminSend()">
+          <button class="btn btn-primary btn-sm" onclick="adminSend()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="panel" id="panel-notifications">
+    <div class="card">
+      <div class="card-head"><h3>WhatsApp & Telegram alerts</h3><span style="font-size:12px;color:var(--muted)">You'll be notified instantly for each event</span></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+          <div class="form-group"><label>Your WhatsApp number</label><input type="text" value="+91 98765 43210" placeholder="+91 XXXXX XXXXX"></div>
+          <div class="form-group"><label>Telegram username</label><input type="text" value="@KishorSpicesAdmin" placeholder="@username"></div>
+        </div>
+        <div>
+          <div class="notify-row">
+            <div class="notify-info"><h4>New order placed</h4><p>Get notified every time a customer places an order</p></div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div class="notify-row">
+            <div class="notify-info"><h4>New chat message</h4><p>When a customer sends a message on the website</p></div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div class="notify-row">
+            <div class="notify-info"><h4>New contact form</h4><p>When someone fills the contact form on the website</p></div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div class="notify-row">
+            <div class="notify-info"><h4>Low stock alert</h4><p>When any product's stock falls below 20 units</p></div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div class="notify-row">
+            <div class="notify-info"><h4>Daily visitor summary</h4><p>Evening summary of today's visitors and orders</p></div>
+            <button class="toggle" onclick="this.classList.toggle('on')"></button>
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="saveNotify()">Save settings</button>
+          <button class="btn btn-secondary" onclick="testNotify()">📲 Send test alert</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>How notifications work</h3></div>
+      <div class="card-body" style="font-size:13px;color:var(--muted);line-height:1.8">
+        <p>When a customer places an order on your website, you'll instantly receive a WhatsApp message on your phone with the order details — customer name, items, total amount, and their contact number.</p>
+        <br>
+        <p>To fully activate WhatsApp notifications, you need to connect a free service called <strong style="color:var(--bark)">Twilio</strong> or <strong style="color:var(--bark)">CallMeBot</strong>. Once your site is live on GitHub, I will walk you through the 5-minute setup — no coding needed.</p>
+        <br>
+        <p>Telegram works the same way through a free Telegram Bot — also a 5-minute setup after your site is live.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-backdrop" id="productModal">
+  <div class="modal">
+    <h2 id="pm-heading">Add product</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>Product name</label><input id="pm-name" type="text" placeholder="e.g. Kashmiri Red Chilli"></div>
+      <div class="form-group"><label>Price (₹)</label><input id="pm-price" type="number" min="0" placeholder="150"></div>
+      <div class="form-group"><label>Emoji icon</label><input id="pm-emoji" type="text" maxlength="2" style="width:70px" placeholder="🌶️"></div>
+      <div class="form-group"><label>Stock quantity</label><input id="pm-stock" type="number" min="0" placeholder="100"></div>
+      <div class="form-group"><label>Tag</label>
+        <select id="pm-tag">
+          <option value="">No tag</option>
+          <option value="hot">🔥 Hot item</option>
+          <option value="new">✨ New launch</option>
+          <option value="selling">⚡ Selling fast</option>
+          <option value="bestseller">⭐ Bestseller</option>
+          <option value="premium">💎 Premium</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select id="pm-status">
+          <option value="live">Live (visible on site)</option>
+          <option value="draft">Draft (hidden)</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>Description</label><textarea id="pm-desc" placeholder="Short description of the spice..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save product</button>
+    </div>
+  </div>
+</div>
+
+<!-- BLOG MODAL -->
+<div class="modal-backdrop" id="blogModal">
+  <div class="modal">
+    <h2 id="bm-heading">New blog post</h2>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group"><label>Title</label><input id="bm-title" type="text" placeholder="Your post title..."></div>
+      <div class="form-group"><label>Category</label>
+        <select id="bm-category">
+          <option>Health & Wellness</option>
+          <option>Recipes</option>
+          <option>Tips & Tricks</option>
+          <option>Behind the Scenes</option>
+          <option>News & Updates</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Emoji / thumbnail</label><input id="bm-emoji" type="text" maxlength="2" style="width:70px" placeholder="🌿"></div>
+      <div class="form-group"><label>Short excerpt (shown on homepage)</label><textarea id="bm-excerpt" style="min-height:60px" placeholder="One or two sentences that make people want to read..."></textarea></div>
+      <div class="form-group"><label>Full content</label><textarea id="bm-content" style="min-height:120px" placeholder="Write your full blog post here..."></textarea></div>
+      <div class="form-group"><label>Author name</label><input id="bm-author" type="text" placeholder="Kishor Bhai"></div>
+      <div class="form-group"><label>Status</label>
+        <select id="bm-status">
+          <option value="published">Published (visible on site)</option>
+          <option value="draft">Draft (hidden)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('blogModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBlog()">Save post</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="admin-toast" id="adminToast"></div>
+
+<script src="../js/data.js"></script>
+<script>
+var editProdIdx = -1;
+var editBlogIdx = -1;
+
+var chatHistory = [
+  [{from:'customer',text:'Do you ship to Pune?'},{from:'customer',text:'I want to order bulk garam masala'}],
+  [{from:'customer',text:'What is the price for 10kg bulk order of turmeric?'}],
+  [{from:'customer',text:'My order KS-1038 was supposed to arrive yesterday. Still not here.'},{from:'admin',text:'Sorry for the delay! We are checking with the courier. Will update you shortly.'}]
+];
+var currentChat = 0;
+
+// ---- NAVIGATION ----
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sb-item').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('panel-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  var titles = {dashboard:'Dashboard',products:'Products',orders:'Orders',blog:'Blog Posts',visitors:'Visitors & Data',chat:'Chat & Support',notifications:'Notification Settings'};
+  var subs = {dashboard:'Welcome back — here\'s what\'s happening today',products:'Manage all 40 spices — price, tags, stock, and visibility',orders:'View and manage all customer orders',blog:'Write and manage your blog posts',visitors:'See who\'s visiting your store and what they\'re looking at',chat:'Reply to customer messages from the website chatbot',notifications:'Configure WhatsApp & Telegram alerts'};
+  document.getElementById('panelTitle').textContent = titles[id]||id;
+  document.getElementById('panelSub').textContent = subs[id]||'';
+  if(id==='dashboard') renderDashboard();
+  if(id==='products') renderProducts(KS.products);
+  if(id==='orders') renderOrders();
+  if(id==='blog') renderBlog();
+  if(id==='chat') loadChat(0, document.querySelector('.chat-list-item'));
+}
+
+// ---- DASHBOARD ----
+function renderDashboard() {
+  document.getElementById('dash-products').textContent = KS.products.filter(function(p){return p.status==='live';}).length;
+  document.getElementById('dash-posts').textContent = KS.posts.length;
+
+  var tbody = '<thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>';
+  KS.orders.slice(0,4).forEach(function(o){
+    tbody += '<tr><td>'+o.id+'</td><td>'+o.customer+'</td><td>₹'+o.total+'</td><td><span class="badge b-'+o.status+'">'+o.status+'</span></td></tr>';
+  });
+  tbody += '</tbody>';
+  document.getElementById('dash-orders').innerHTML = tbody;
+
+  var topProds = KS.analytics.topProducts;
+  document.getElementById('dash-top').innerHTML = topProds.map(function(name,i){
+    var pct = [85,72,63][i]||50;
+    return '<div class="bar-item"><span style="min-width:110px;font-size:12px">'+name+'</span><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div><span class="bar-val">'+pct+'%</span></div>';
+  }).join('');
+}
+
+// ---- PRODUCTS ----
+var prodFilter = { search:'', tag:'', status:'' };
+function renderProducts(list) {
+  var filtered = list.filter(function(p){
+    if(prodFilter.search && !p.name.toLowerCase().includes(prodFilter.search.toLowerCase())) return false;
+    if(prodFilter.tag && p.tag !== prodFilter.tag) return false;
+    if(prodFilter.status && p.status !== prodFilter.status) return false;
+    return true;
+  });
+  var html = '<thead><tr><th>Icon</th><th>Name</th><th>Price</th><th>Tag</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  filtered.forEach(function(p, i){
+    var idx = KS.products.indexOf(p);
+    var tagBadge = p.tag ? '<span class="badge b-'+p.tag+'">'+p.tag+'</span>' : '<span style="color:var(--muted);font-size:12px">—</span>';
+    html += '<tr>' +
+      '<td style="font-size:22px">'+p.emoji+'</td>' +
+      '<td style="font-weight:500">'+p.name+'</td>' +
+      '<td>₹'+p.price+'</td>' +
+      '<td>'+tagBadge+'</td>' +
+      '<td>'+(p.stock < 50 ? '<span style="color:var(--chili)">⚠ '+p.stock+'</span>' : p.stock)+'</td>' +
+      '<td><span class="badge '+(p.status==='live'?'b-live':'b-draft')+'">'+p.status+'</span></td>' +
+      '<td><div style="display:flex;gap:6px">' +
+        '<button class="btn btn-sm btn-secondary" onclick="openProductModal('+idx+')">Edit</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="toggleStatus('+idx+')">'+( p.status==='live'?'Hide':'Show')+'</button>' +
+      '</div></td>' +
+    '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('productsTable').innerHTML = html;
+}
+function filterProducts(v){ prodFilter.search=v; renderProducts(KS.products); }
+function filterTag(v){ prodFilter.tag=v; renderProducts(KS.products); }
+function filterStatus(v){ prodFilter.status=v; renderProducts(KS.products); }
+
+function openProductModal(idx) {
+  editProdIdx = idx;
+  var p = idx >= 0 ? KS.products[idx] : {name:'',price:'',emoji:'📦',stock:100,tag:'',status:'live',desc:''};
+  document.getElementById('pm-heading').textContent = idx>=0 ? 'Edit product' : 'Add product';
+  document.getElementById('pm-name').value = p.name;
+  document.getElementById('pm-price').value = p.price;
+  document.getElementById('pm-emoji').value = p.emoji;
+  document.getElementById('pm-stock').value = p.stock;
+  document.getElementById('pm-tag').value = p.tag;
+  document.getElementById('pm-status').value = p.status;
+  document.getElementById('pm-desc').value = p.desc;
+  openModal('productModal');
+}
+
+function saveProduct() {
+  var p = {
+    id: editProdIdx>=0 ? KS.products[editProdIdx].id : Date.now(),
+    name: document.getElementById('pm-name').value || 'New Spice',
+    price: parseFloat(document.getElementById('pm-price').value)||0,
+    emoji: document.getElementById('pm-emoji').value || '📦',
+    stock: parseInt(document.getElementById('pm-stock').value)||0,
+    tag: document.getElementById('pm-tag').value,
+    status: document.getElementById('pm-status').value,
+    desc: document.getElementById('pm-desc').value
+  };
+  if(editProdIdx>=0) KS.products[editProdIdx]=p;
+  else KS.products.push(p);
+  closeModal('productModal');
+  renderProducts(KS.products);
+  showToast((editProdIdx>=0?'Product updated!':'Product added!') + ' Changes are live on your site.');
+}
+
+function toggleStatus(idx) {
+  KS.products[idx].status = KS.products[idx].status==='live' ? 'draft' : 'live';
+  renderProducts(KS.products);
+  showToast('Product is now '+ KS.products[idx].status +'.');
+}
+
+// ---- ORDERS ----
+function renderOrders() {
+  var html = '<thead><tr><th>Order ID</th><th>Customer</th><th>Phone</th><th>Items</th><th>Total</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  KS.orders.forEach(function(o){
+    html += '<tr>' +
+      '<td style="font-weight:500">'+o.id+'</td>' +
+      '<td>'+o.customer+'</td>' +
+      '<td style="color:var(--muted)">'+o.phone+'</td>' +
+      '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+o.items+'">'+o.items+'</td>' +
+      '<td style="font-weight:500">₹'+o.total+'</td>' +
+      '<td style="color:var(--muted)">'+o.date+'</td>' +
+      '<td><span class="badge b-'+o.status+'">'+o.status+'</span></td>' +
+      '<td><div style="display:flex;gap:5px">' +
+        '<button class="btn btn-sm btn-secondary" onclick="waMsg(\'91'+o.phone+'\',\'Hi '+o.customer.split(' ')[0]+' ji! Your Kishor Spices order '+o.id+' has been shipped and will arrive in 2-3 days. Thank you!\')">📲 Update</button>' +
+      '</div></td>' +
+    '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('ordersTable').innerHTML = html;
+}
+
+// ---- BLOG ----
+function renderBlog() {
+  var html = '<thead><tr><th>Emoji</th><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  KS.posts.forEach(function(p, i){
+    html += '<tr>' +
+      '<td style="font-size:22px">'+p.emoji+'</td>' +
+      '<td style="font-weight:500;max-width:200px">'+p.title+'</td>' +
+      '<td><span style="font-size:12px;color:var(--muted)">'+p.category+'</span></td>' +
+      '<td>'+p.author+'</td>' +
+      '<td style="color:var(--muted)">'+p.date+'</td>' +
+      '<td><span class="badge '+(p.status==='published'?'b-live':'b-draft')+'">'+p.status+'</span></td>' +
+      '<td><div style="display:flex;gap:5px">' +
+        '<button class="btn btn-sm btn-secondary" onclick="openBlogModal('+i+')">Edit</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="deletePost('+i+')">Delete</button>' +
+      '</div></td>' +
+    '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('blogTable').innerHTML = html;
+}
+
+function openBlogModal(idx) {
+  editBlogIdx = idx;
+  var p = idx>=0 ? KS.posts[idx] : {title:'',category:'Recipes',emoji:'🌿',excerpt:'',content:'',author:'Kishor Bhai',status:'published'};
+  document.getElementById('bm-heading').textContent = idx>=0 ? 'Edit post' : 'New blog post';
+  document.getElementById('bm-title').value = p.title;
+  document.getElementById('bm-category').value = p.category;
+  document.getElementById('bm-emoji').value = p.emoji;
+  document.getElementById('bm-excerpt').value = p.excerpt;
+  document.getElementById('bm-content').value = p.content;
+  document.getElementById('bm-author').value = p.author;
+  document.getElementById('bm-status').value = p.status;
+  openModal('blogModal');
+}
+
+function saveBlog() {
+  var now = new Date();
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var p = {
+    id: editBlogIdx>=0 ? KS.posts[editBlogIdx].id : Date.now(),
+    title: document.getElementById('bm-title').value || 'Untitled Post',
+    category: document.getElementById('bm-category').value,
+    emoji: document.getElementById('bm-emoji').value || '🌿',
+    excerpt: document.getElementById('bm-excerpt').value,
+    content: document.getElementById('bm-content').value,
+    author: document.getElementById('bm-author').value || 'Kishor Bhai',
+    status: document.getElementById('bm-status').value,
+    date: months[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear()
+  };
+  if(editBlogIdx>=0) KS.posts[editBlogIdx]=p;
+  else KS.posts.push(p);
+  closeModal('blogModal');
+  renderBlog();
+  showToast('Blog post saved!');
+}
+
+function deletePost(i) {
+  if(!confirm('Delete this post?')) return;
+  KS.posts.splice(i,1);
+  renderBlog();
+  showToast('Post deleted.');
+}
+
+// ---- CHAT ----
+function loadChat(idx, el) {
+  currentChat = idx;
+  document.querySelectorAll('.chat-list-item').forEach(function(li){ li.classList.remove('active'); });
+  if(el) el.classList.add('active');
+  var names = ['Ramesh Kumar','Priya Sharma','Mohammed Raza'];
+  document.getElementById('chatCustomerName').textContent = names[idx]||'Customer';
+  var area = document.getElementById('chatArea');
+  area.innerHTML = (chatHistory[idx]||[]).map(function(m){
+    var cls = m.from==='admin' ? 'cm admin' : (m.from==='ai' ? 'cm ai' : 'cm customer');
+    var label = m.from==='admin' ? '<span class="cm-label">You</span>' : (m.from==='ai' ? '<span class="cm-label">AI suggestion</span>' : '');
+    return '<div class="'+cls+'">'+label+m.text+'</div>';
+  }).join('');
+  area.scrollTop = area.scrollHeight;
+}
+
+function adminSend() {
+  var input = document.getElementById('adminReplyInput');
+  var text = input.value.trim();
+  if(!text) return;
+  if(!chatHistory[currentChat]) chatHistory[currentChat]=[];
+  chatHistory[currentChat].push({from:'admin', text:text});
+  input.value = '';
+  loadChat(currentChat, null);
+  showToast('Reply sent!');
+}
+
+function aiSuggest() {
+  var suggestions = [
+    'Thank you for reaching out! Yes, we ship to Pune. Standard delivery takes 3-5 business days and is free above ₹499.',
+    'Namaste! For bulk orders, please share your quantity and we will give you a special price. You can also email us at hello@kishorspices.com.',
+    'We sincerely apologise for the delay. I am checking with the courier right now and will update you within the hour. Thank you for your patience!'
+  ];
+  var text = suggestions[currentChat] || 'Thank you for contacting Kishor Spices! How can I help you today?';
+  if(!chatHistory[currentChat]) chatHistory[currentChat]=[];
+  chatHistory[currentChat].push({from:'ai', text:text});
+  loadChat(currentChat, null);
+  document.getElementById('adminReplyInput').value = text;
+}
+
+function openWhatsApp() {
+  var phones = ['919876543210','919823456789','919534567890'];
+  waMsg(phones[currentChat]||phones[0], 'Namaste! This is Kishor Spices support. How can I help you?');
+}
+
+// ---- UTILITIES ----
+function waMsg(phone, msg) {
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function showToast(msg) {
+  var t = document.getElementById('adminToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+function testNotify() {
+  var msg = '🔔 Test alert from Kishor Spices Admin!\n\nYour WhatsApp notifications are working correctly. You will receive alerts for new orders, messages, and more.';
+  waMsg('919876543210', msg);
+  showToast('Test WhatsApp message sent!');
+}
+
+function saveNotify() { showToast('Notification settings saved!'); }
+
+// ---- INIT ----
+renderDashboard();
+document.querySelector('.modal-backdrop').addEventListener('click', function(e){ if(e.target===this) closeModal(this.id); });
+</script>
+</body>
+</html>
