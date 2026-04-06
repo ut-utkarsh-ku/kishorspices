@@ -26,24 +26,51 @@ function renderAll() {
 }
 
 function productCard(p) {
-  var tagHtml = '';
-  if(p.tag === 'hot') tagHtml = '<span class="product-tag tag-hot">🔥 Hot</span>';
-  else if(p.tag === 'new') tagHtml = '<span class="product-tag tag-new">✨ New</span>';
-  else if(p.tag === 'selling') tagHtml = '<span class="product-tag tag-selling">⚡ Selling Fast</span>';
-  else if(p.tag === 'bestseller') tagHtml = '<span class="product-tag tag-bestseller">⭐ Bestseller</span>';
-  else if(p.tag === 'premium') tagHtml = '<span class="product-tag" style="background:#8E44AD;color:#fff">💎 Premium</span>';
 
-  return '<div class="product-card" onclick="openDetail('+p.id+')">' +
-    '<div class="product-img">'+p.emoji+tagHtml+'</div>' +
-    '<div class="product-body">' +
-      '<div class="product-name">'+p.name+'</div>' +
-      '<div class="product-desc">'+p.desc+'</div>' +
-      '<div class="product-footer">' +
-        '<div class="product-price">'+KS.currency+p.price+'</div>' +
-        '<button class="add-cart" onclick="event.stopPropagation();addToCart('+p.id+')">Add to cart</button>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
+  var tag = '';
+  if(p.tag){
+    tag = '<div style="position:absolute;top:10px;left:10px;background:#E8820C;color:#fff;font-size:10px;padding:4px 10px;border-radius:20px">'+p.tag.toUpperCase()+'</div>';
+  }
+
+  return `
+  <div style="
+    background:#fff;
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.05);
+    transition:0.3s;
+    cursor:pointer;
+  " onclick="openDetail(${p.id})"
+  onmouseover="this.style.transform='translateY(-6px)'"
+  onmouseout="this.style.transform='translateY(0)'"
+  >
+
+    <div style="position:relative;text-align:center;font-size:50px;margin-bottom:10px">
+      ${p.emoji}
+      ${tag}
+    </div>
+
+    <div style="font-weight:600;font-size:16px;margin-bottom:6px">
+      ${p.name}
+    </div>
+
+    <div style="font-size:13px;color:#777;margin-bottom:12px">
+      ${p.desc.substring(0,60)}...
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="color:#E8820C;font-weight:700;font-size:16px">
+        ₹${p.price}
+      </div>
+
+      <button onclick="event.stopPropagation();addToCart(${p.id})"
+        style="background:#E8820C;color:#fff;border:none;padding:8px 14px;border-radius:20px;font-size:12px;cursor:pointer">
+        Add
+      </button>
+    </div>
+
+  </div>
+  `;
 }
 
 // ---- RENDER BLOG ----
