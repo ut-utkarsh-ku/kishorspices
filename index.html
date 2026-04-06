@@ -9,8 +9,8 @@
 body {
   margin:0;
   font-family: 'Segoe UI', sans-serif;
-  background:#FAF5ED;
-  color:#1C1208;
+  background:#F8F6F2;
+  color:#1C1C1C;
 }
 
 /* NAV */
@@ -18,62 +18,69 @@ nav {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:18px 6%;
+  padding:18px 8%;
   background:#fff;
-  position:sticky;
-  top:0;
-  z-index:100;
+  border-bottom:1px solid #eee;
+}
+.logo {
+  font-weight:600;
+  font-size:18px;
 }
 .nav-links {
   display:flex;
-  gap:25px;
+  gap:30px;
   list-style:none;
 }
 .nav-links a {
   text-decoration:none;
   color:#333;
-  font-weight:500;
-  transition:0.3s;
-}
-.nav-links a:hover {
-  color:#E8820C;
+  font-size:14px;
 }
 
 /* HERO */
 .hero {
-  height:90vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  background:linear-gradient(135deg,#fff,#F3E8D8);
+  padding:100px 8%;
+  max-width:900px;
 }
 .hero h1 {
-  font-size:52px;
+  font-size:48px;
+  font-weight:600;
+  line-height:1.2;
 }
 .hero p {
+  margin-top:15px;
   color:#666;
-  margin:15px 0 25px;
+  font-size:16px;
 }
 .btn {
-  background:#E8820C;
+  margin-top:25px;
+  padding:12px 26px;
+  background:#1C1C1C;
   color:#fff;
-  padding:12px 28px;
   border:none;
-  border-radius:30px;
   cursor:pointer;
-  transition:0.3s;
+  border-radius:4px;
 }
-.btn:hover {
-  transform:scale(1.05);
+
+/* TRUST */
+.trust {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:40px;
+  padding:60px 8%;
+  background:#fff;
+}
+.trust h3 {
+  font-size:16px;
+}
+.trust p {
+  font-size:13px;
+  color:#666;
 }
 
 /* PRODUCTS */
 .container {
-  max-width:1200px;
-  margin:auto;
-  padding:60px 6%;
+  padding:60px 8%;
 }
 .grid {
   display:grid;
@@ -82,40 +89,41 @@ nav {
 }
 .product-card {
   background:#fff;
-  padding:18px;
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.05);
-  transition:0.3s;
-  text-align:center;
+  padding:20px;
+  border:1px solid #eee;
 }
-.product-card:hover {
-  transform:translateY(-8px);
+.product-card h3 {
+  font-size:15px;
+}
+.product-card p {
+  color:#666;
 }
 .product-card button {
   margin-top:10px;
-  background:#E8820C;
+  padding:8px 14px;
+  background:#1C1C1C;
   color:#fff;
   border:none;
-  padding:8px 14px;
-  border-radius:20px;
 }
 
-/* SECTIONS */
+/* SECTION */
 .section {
-  padding:80px 6%;
-  text-align:center;
+  padding:80px 8%;
 }
 .section h2 {
-  font-size:32px;
-  margin-bottom:20px;
+  font-size:28px;
+  margin-bottom:10px;
+}
+.section p {
+  color:#666;
 }
 
 /* FOOTER */
 footer {
-  text-align:center;
-  padding:30px;
-  background:#fff;
+  padding:30px 8%;
   border-top:1px solid #eee;
+  font-size:13px;
+  color:#666;
 }
 </style>
 
@@ -124,7 +132,7 @@ footer {
 
 <!-- NAV -->
 <nav>
-  <div><b>Kishor Spices</b></div>
+  <div class="logo">Kishor Spices</div>
   <ul class="nav-links">
     <li><a href="shop/index.html">Shop</a></li>
     <li><a href="#about">About</a></li>
@@ -135,35 +143,63 @@ footer {
 
 <!-- HERO -->
 <div class="hero">
-  <h1>Pure Spices. Real Taste.</h1>
-  <p>From Ghorawal, Sonbhadra — trusted since 1998</p>
-  <a href="shop/index.html"><button class="btn">Shop Now</button></a><p style="margin-top:15px;color:#E8820C;font-weight:500">
-⚡ Fresh stock available — limited batches
-</p>
+  <h1>Spices you can trust.  
+  <br>Quality you can feel.</h1>
+
+  <p>From Ghorawal, Sonbhadra — serving purity since 1998.</p>
+
+  <a href="shop/index.html">
+    <button class="btn">Explore Products</button>
+  </a>
+
+  <p style="margin-top:10px;color:#888;font-size:13px">
+    Fresh batches prepared regularly
+  </p>
+</div>
+
+<!-- TRUST -->
+<div class="trust">
+  <div>
+    <h3>Pure Ingredients</h3>
+    <p>No artificial mixing. Only authentic spices.</p>
+  </div>
+  <div>
+    <h3>Local Roots</h3>
+    <p>Built from Sonbhadra with real experience.</p>
+  </div>
+  <div>
+    <h3>Consistent Taste</h3>
+    <p>Same aroma and quality every time.</p>
+  </div>
+  <div>
+    <h3>Direct Support</h3>
+    <p>Order and connect easily via WhatsApp.</p>
+  </div>
 </div>
 
 <!-- PRODUCTS -->
 <div class="container">
-  <h2>🔥 Best Selling Spices</h2>
-<p style="color:#666">Most ordered by our customers</p>
+  <h2>Best Selling Products</h2>
+  <p style="color:#666;margin-bottom:20px">Trusted by regular customers</p>
+
   <div class="grid" id="productGrid"></div>
 </div>
 
 <!-- ABOUT -->
 <div id="about" class="section">
-  <h2>Why Kishor Spices?</h2>
-  <p>Pure, chemical-free spices directly sourced from farmers. No compromise in taste or quality.</p>
+  <h2>About Us</h2>
+  <p>Kishor Spices is built on a simple idea — deliver pure and honest spices to every household.</p>
 </div>
 
 <!-- STORY -->
 <div id="story" class="section" style="background:#fff">
   <h2>Our Journey</h2>
-  <p>Started from a small town in Sonbhadra, built on trust and quality over generations.</p>
+  <p>From a small beginning in Sonbhadra to becoming a trusted name in kitchens — our journey is built on consistency and trust.</p>
 </div>
 
 <!-- CONTACT -->
 <div id="contact" class="section">
-  <h2>Contact Us</h2>
+  <h2>Contact</h2>
   <p>📞 9120007475</p>
   <p>📍 Ghorawal, Sonbhadra</p>
 </div>
@@ -173,15 +209,21 @@ footer {
   © 2025 Kishor Spices
 </footer>
 
+<!-- WHATSAPP BUTTON -->
+<a href="https://wa.me/919120007475" target="_blank"
+style="position:fixed;bottom:20px;right:20px;background:#25D366;color:#fff;padding:12px 18px;border-radius:30px;text-decoration:none;font-size:14px;">
+WhatsApp
+</a>
+
 <!-- JS -->
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>
 
 <script>
 function loadProducts(){
-  var html = KS.products.slice(0,8).map(p => `
+  var html = KS.products.slice(0,6).map(p => `
     <div class="product-card">
-      <div style="font-size:40px">${p.emoji}</div>
+      <div style="font-size:36px">${p.emoji}</div>
       <h3>${p.name}</h3>
       <p>₹${p.price}</p>
       <button onclick="addToCart(${p.id})">Add</button>
@@ -191,11 +233,6 @@ function loadProducts(){
 }
 loadProducts();
 </script>
-<a href="https://wa.me/919120007475" target="_blank" 
-style="position:fixed;bottom:20px;right:20px;background:#25D366;color:#fff;padding:14px 18px;border-radius:50px;font-size:14px;text-decoration:none;box-shadow:0 10px 25px rgba(0,0,0,0.2);z-index:999;">
-💬 Order on WhatsApp
-</a>
 
-</body>
 </body>
 </html>
