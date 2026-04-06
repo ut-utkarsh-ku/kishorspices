@@ -3,24 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Kishor Spices</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
 
 body {
   margin:0;
   font-family:'Inter', sans-serif;
-  background:#0f0f0f;
+  background:#0e0e0e;
   color:#fff;
+  overflow-x:hidden;
 }
 
 /* NAV */
 nav {
   position:fixed;
   width:100%;
-  top:0;
   display:flex;
   justify-content:space-between;
   padding:20px 8%;
@@ -53,9 +54,8 @@ nav a {
   max-width:600px;
 }
 .hero h1 {
-  font-family:'Playfair Display', serif;
-  font-size:56px;
-  line-height:1.2;
+  font-family:'Playfair Display';
+  font-size:60px;
 }
 .hero p {
   margin-top:20px;
@@ -63,20 +63,35 @@ nav a {
 }
 .btn {
   margin-top:30px;
-  padding:12px 28px;
+  padding:12px 30px;
   border:1px solid #fff;
   background:transparent;
   color:#fff;
   cursor:pointer;
+  transition:0.3s;
+}
+.btn:hover {
+  background:#fff;
+  color:#000;
+}
+
+/* REVEAL */
+.reveal {
+  opacity:0;
+  transform:translateY(50px);
+  transition:all 1s ease;
+}
+.reveal.show {
+  opacity:1;
+  transform:translateY(0);
 }
 
 /* TRUST */
 .trust {
+  padding:80px 8%;
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:30px;
-  padding:80px 8%;
-  background:#111;
 }
 .trust div {
   border-left:2px solid #d4a017;
@@ -96,29 +111,35 @@ nav a {
   background:#111;
   padding:20px;
   border:1px solid #222;
-  transition:0.3s;
+  transition:0.4s;
 }
 .product-card:hover {
-  transform:translateY(-8px);
-}
-.product-card button {
-  margin-top:10px;
-  background:#d4a017;
-  border:none;
-  padding:8px 14px;
+  transform:translateY(-10px) scale(1.03);
+  box-shadow:0 20px 40px rgba(0,0,0,0.6);
 }
 
 /* FOOTER */
 footer {
-  padding:40px 8%;
+  padding:40px;
   text-align:center;
-  background:#000;
   color:#888;
 }
 
-</style>
-</head>
+/* WHATSAPP */
+.whatsapp {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#25D366;
+  padding:12px 18px;
+  border-radius:30px;
+  color:#fff;
+  text-decoration:none;
+}
 
+</style>
+
+</head>
 <body>
 
 <nav>
@@ -130,42 +151,30 @@ footer {
   </div>
 </nav>
 
-<div class="hero">
+<div class="hero" id="hero">
   <div class="hero-content">
     <h1>Not just spices.<br>A legacy of flavor.</h1>
     <p>Crafted in Sonbhadra. Trusted in every kitchen.</p>
-    <a href="shop/index.html"><button class="btn">Explore Products</button></a>
+    <a href="shop/index.html"><button class="btn">Explore</button></a>
   </div>
 </div>
 
-<div class="trust">
-  <div>
-    <h3>100% Pure</h3>
-    <p>No artificial colors or additives</p>
-  </div>
-  <div>
-    <h3>Farm Sourced</h3>
-    <p>Direct from trusted farmers</p>
-  </div>
-  <div>
-    <h3>Authentic Taste</h3>
-    <p>Rich aroma and strong flavor</p>
-  </div>
+<div class="trust reveal">
+  <div><h3>100% Pure</h3><p>No artificial mixing</p></div>
+  <div><h3>Farm Direct</h3><p>Authentic sourcing</p></div>
+  <div><h3>Rich Flavor</h3><p>Strong aroma</p></div>
 </div>
 
-<div class="container">
-  <h2 style="font-family:'Playfair Display';">Signature Products</h2>
+<div class="container reveal">
+  <h2 style="font-family:'Playfair Display'">Signature Products</h2>
   <div class="grid" id="productGrid"></div>
 </div>
 
 <footer>
-  © Kishor Spices | WhatsApp: 9120007475
+© Kishor Spices
 </footer>
 
-<a href="https://wa.me/919120007475" target="_blank"
-style="position:fixed;bottom:20px;right:20px;background:#25D366;padding:12px 18px;border-radius:30px;color:#fff;text-decoration:none;">
-Chat
-</a>
+<a href="https://wa.me/919120007475" class="whatsapp">Chat</a>
 
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>
@@ -183,6 +192,22 @@ function loadProducts(){
   document.getElementById("productGrid").innerHTML = html;
 }
 loadProducts();
+
+/* Reveal */
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add("show");
+    }
+  });
+});
+document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+
+/* Parallax */
+window.addEventListener("scroll",()=>{
+  const hero = document.getElementById("hero");
+  hero.style.backgroundPositionY = window.scrollY * 0.5 + "px";
+});
 </script>
 
 </body>
