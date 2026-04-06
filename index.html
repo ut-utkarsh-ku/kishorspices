@@ -23,19 +23,15 @@ nav {
   justify-content:space-between;
   padding:20px 8%;
   background:#fff;
-  position:sticky;
-  top:0;
-  z-index:100;
 }
 
 /* HERO */
 .hero {
   padding:100px 8%;
-  max-width:900px;
 }
 .hero h1 {
   font-family:'Playfair Display';
-  font-size:50px;
+  font-size:48px;
 }
 .hero p {
   color:#666;
@@ -46,6 +42,7 @@ nav {
   background:#E8820C;
   color:#fff;
   border:none;
+  cursor:pointer;
 }
 
 /* TRUST */
@@ -75,16 +72,27 @@ nav {
   transform:translateY(-5px);
 }
 
-/* POPUP */
-.popup {
+/* ANIMATION */
+.reveal {
+  opacity:0;
+  transform:translateY(30px);
+  transition:0.8s;
+}
+.reveal.show {
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* WHATSAPP */
+.whatsapp {
   position:fixed;
   bottom:20px;
-  left:20px;
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
-  display:none;
+  right:20px;
+  background:#25D366;
+  color:#fff;
+  padding:12px 18px;
+  border-radius:30px;
+  text-decoration:none;
 }
 
 </style>
@@ -94,72 +102,56 @@ nav {
 
 <nav>
   <div><b>Kishor Spices</b></div>
-  <div>
-    <a href="shop/index.html">Shop</a>
-  </div>
+  <div><a href="shop/index.html">Shop</a></div>
 </nav>
 
-<div class="hero">
+<div class="hero reveal">
   <h1>Ghar jaisa bharosa.<br>Asli swaad.</h1>
   <p>Sonbhadra se seedha aapke kitchen tak</p>
   <a href="shop/index.html"><button class="btn">Shop Now</button></a>
 </div>
 
-<div class="trust">
+<div class="trust reveal">
   <div><h3>100% Pure</h3></div>
   <div><h3>No Chemicals</h3></div>
   <div><h3>Strong Taste</h3></div>
 </div>
 
-<div class="container">
+<div class="container reveal">
   <h2>Best Selling</h2>
   <div class="grid" id="productGrid"></div>
 </div>
 
-<!-- CRM POPUP -->
-<div class="popup" id="popup">
-  <h4>Get Offers 🎁</h4>
-  <input id="name" placeholder="Name"><br><br>
-  <input id="phone" placeholder="Phone"><br><br>
-  <button onclick="saveLead()">Submit</button>
-</div>
+<a href="https://wa.me/919120007475" class="whatsapp">Order</a>
 
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>
 
 <script>
 
+/* LOAD PRODUCTS (FIXED) */
 function loadProducts(){
   var html = KS.products.slice(0,6).map(p => `
     <div class="product-card">
+      <div style="font-size:30px">${p.emoji}</div>
       <h3>${p.name}</h3>
       <p>₹${p.price}</p>
-      <button onclick="orderNow('${p.name}',${p.price})">Order</button>
+      <button onclick="addToCart(${p.id})">Add to Cart</button>
     </div>
   `).join('');
   document.getElementById("productGrid").innerHTML = html;
 }
 loadProducts();
 
-/* CRM */
-setTimeout(()=>document.getElementById("popup").style.display="block",3000);
-
-function saveLead(){
-  var name=document.getElementById("name").value;
-  var phone=document.getElementById("phone").value;
-
-  var leads=JSON.parse(localStorage.getItem("leads")||"[]");
-  leads.push({name,phone});
-  localStorage.setItem("leads",JSON.stringify(leads));
-
-  alert("Saved!");
-}
-
-/* WhatsApp Order */
-function orderNow(name,price){
-  var msg=`Order: ${name} - ₹${price}`;
-  window.open(`https://wa.me/919120007475?text=${encodeURIComponent(msg)}`);
-}
+/* ANIMATION */
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add("show");
+    }
+  });
+});
+document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
 
 </script>
 
