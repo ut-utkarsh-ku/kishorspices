@@ -23,6 +23,8 @@ nav {
   justify-content:space-between;
   padding:20px 8%;
   background:#fff;
+  position:sticky;
+  top:0;
 }
 
 /* HERO */
@@ -43,6 +45,7 @@ nav {
   color:#fff;
   border:none;
   cursor:pointer;
+  border-radius:6px;
 }
 
 /* TRUST */
@@ -64,23 +67,38 @@ nav {
 }
 .product-card {
   background:#fff;
-  padding:15px;
-  border-radius:10px;
+  padding:18px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.05);
   transition:0.3s;
 }
 .product-card:hover {
-  transform:translateY(-5px);
+  transform:translateY(-6px);
 }
 
 /* ANIMATION */
 .reveal {
   opacity:0;
-  transform:translateY(30px);
-  transition:0.8s;
+  transform:translateY(40px);
+  transition:all 0.8s ease;
 }
 .reveal.show {
   opacity:1;
   transform:translateY(0);
+}
+
+/* POPUP */
+.popup {
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  z-index:999;
+  display:none;
+  width:220px;
 }
 
 /* WHATSAPP */
@@ -122,6 +140,15 @@ nav {
   <div class="grid" id="productGrid"></div>
 </div>
 
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <span onclick="closePopup()" style="position:absolute;top:8px;right:12px;cursor:pointer;">✖</span>
+  <h4>Get Offers 🎁</h4>
+  <input id="name" placeholder="Name" style="width:100%;margin-bottom:8px"><br>
+  <input id="phone" placeholder="Phone" style="width:100%;margin-bottom:8px"><br>
+  <button onclick="saveLead()" style="width:100%;background:#E8820C;color:#fff;border:none;padding:8px">Submit</button>
+</div>
+
 <a href="https://wa.me/919120007475" class="whatsapp">Order</a>
 
 <script src="js/data.js"></script>
@@ -129,7 +156,7 @@ nav {
 
 <script>
 
-/* LOAD PRODUCTS (FIXED) */
+/* PRODUCTS */
 function loadProducts(){
   var html = KS.products.slice(0,6).map(p => `
     <div class="product-card">
@@ -152,6 +179,32 @@ const observer = new IntersectionObserver(entries=>{
   });
 });
 document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+
+/* POPUP CRM */
+setTimeout(()=>{
+  document.getElementById("popup").style.display="block";
+},3000);
+
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+function saveLead(){
+  var name=document.getElementById("name").value;
+  var phone=document.getElementById("phone").value;
+
+  if(!name || !phone){
+    alert("Enter details");
+    return;
+  }
+
+  var leads=JSON.parse(localStorage.getItem("leads")||"[]");
+  leads.push({name,phone,date:new Date().toLocaleString()});
+  localStorage.setItem("leads",JSON.stringify(leads));
+
+  alert("Saved!");
+  closePopup();
+}
 
 </script>
 
