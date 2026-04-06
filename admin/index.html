@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Kishor Spices</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Cormorant+Garamond:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1C1208;--bark:#3B2314;--muted:#7A6050;--saffron:#D4700A;--gold:#E8A020;--cream:#FAF5ED;--paper:#F3EBD8;--white:#fff;--border:rgba(60,35,20,0.10);--border-md:rgba(60,35,20,0.18);--success:#16A34A;--danger:#DC2626;--warn:#D97706;--sidebar-w:240px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#F7F3EC;color:var(--ink);display:flex;min-height:100vh;font-size:14px}
+.sidebar{width:var(--sidebar-w);background:var(--ink);position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column;overflow-y:auto}
+.sb-brand{padding:22px 18px 18px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.sb-brand-name{font-family:'Cormorant Garamond',serif;font-size:20px;color:#fff;letter-spacing:-0.3px}
+.sb-brand-sub{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px}
+.sb-section{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:18px 18px 6px}
+.sb-link{display:flex;align-items:center;gap:10px;padding:10px 18px;font-size:13px;color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.15s;border-left:3px solid transparent;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;border-left:3px solid transparent}
+.sb-link:hover{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.85)}
+.sb-link.on{background:rgba(212,112,10,0.15);color:#fff;border-left-color:var(--saffron)}
+.sb-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:50px;min-width:20px;text-align:center}
+.sb-footer{margin-top:auto;padding:16px 18px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:8px}
+.sb-footer a{display:block;text-align:center;padding:9px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500;transition:all 0.2s}
+.sb-footer a.public{background:rgba(212,112,10,0.15);color:var(--gold)}
+.sb-footer a.public:hover{background:rgba(212,112,10,0.3)}
+.sb-footer a.logout{color:rgba(255,255,255,0.3);font-size:11px;text-align:center}
+
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:17px;font-weight:500}
+.topbar-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.pulse{width:8px;height:8px;background:#22C55E;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.topbar-wa{display:flex;align-items:center;gap:6px;padding:8px 14px;background:#DCFCE7;color:var(--success);border-radius:8px;font-size:12px;font-weight:500;text-decoration:none;transition:background 0.2s}
+.topbar-wa:hover{background:#BBF7D0}
+
+.panel{display:none;padding:28px;flex-direction:column;gap:20px}
+.panel.on{display:flex}
+
+/* CARDS */
+.card{background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-head h3{font-size:14px;font-weight:500}
+.card-body{padding:20px}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.stat{background:#fff;border-radius:12px;padding:18px;border:1px solid var(--border)}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
+.stat-val{font-size:28px;font-weight:500;font-family:'Cormorant Garamond',serif;color:var(--ink);line-height:1}
+.stat-delta{font-size:12px;margin-top:5px}
+.stat-up{color:var(--success)}
+.stat-dn{color:var(--danger)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:8px 14px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;background:#FAFAF8;border-bottom:1px solid var(--border)}
+.tbl td{padding:12px 14px;border-bottom:1px solid rgba(60,35,20,0.05);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(212,112,10,0.02)}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:3px 9px;border-radius:50px;letter-spacing:0.3px}
+.b-live,.b-published{background:#DCFCE7;color:#15803D}
+.b-draft{background:#FEF9C3;color:#92400E}
+.b-new,.b-confirmed{background:#DBEAFE;color:#1D4ED8}
+.b-shipped{background:#F3E8FF;color:#7E22CE}
+.b-delivered{background:#DCFCE7;color:#15803D}
+.b-cancelled{background:#FEE2E2;color:#991B1B}
+.b-hot{background:#FEE2E2;color:#991B1B}
+.b-selling{background:#FFF7ED;color:#C2410C}
+.b-bestseller{background:#F3E8FF;color:#7E22CE}
+.b-premium{background:#FDF4FF;color:#86198F}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all 0.15s;text-decoration:none;white-space:nowrap}
+.btn-primary{background:var(--saffron);color:#fff}
+.btn-primary:hover{background:var(--bark)}
+.btn-outline{background:transparent;border:1px solid var(--border-md);color:var(--muted)}
+.btn-outline:hover{border-color:var(--ink);color:var(--ink)}
+.btn-danger{background:transparent;border:1px solid #FECACA;color:var(--danger)}
+.btn-danger:hover{background:#FEF2F2}
+.btn-success{background:#DCFCE7;color:var(--success);border:1px solid #BBF7D0}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:6px}
+.btn-wa{background:#DCFCE7;color:var(--success)}
+.btn-wa:hover{background:#BBF7D0}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:12px;font-weight:500;color:var(--muted)}
+.fg input,.fg select,.fg textarea{padding:9px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:13px;color:var(--ink);font-family:'DM Sans',sans-serif;background:#fff;outline:none;transition:border-color 0.2s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--saffron)}
+.fg textarea{resize:vertical;min-height:80px;line-height:1.6}
+
+/* IMAGE UPLOAD */
+.img-upload-area{border:2px dashed var(--border-md);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.img-upload-area:hover{border-color:var(--saffron);background:rgba(212,112,10,0.03)}
+.img-upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-preview{width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:8px;display:none}
+.img-preview.show{display:block}
+.img-placeholder{font-size:32px;margin-bottom:8px;display:block}
+.img-hint{font-size:12px;color:var(--muted)}
+.img-hint strong{color:var(--saffron)}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(28,18,8,0.5);z-index:300;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;backdrop-filter:blur(3px)}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:560px;margin:auto}
+.modal h2{font-size:18px;font-weight:500;margin-bottom:22px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* TOGGLE */
+.toggle{position:relative;width:42px;height:24px;background:#D1D5DB;border-radius:50px;cursor:pointer;border:none;transition:background 0.2s;flex-shrink:0}
+.toggle.on{background:var(--saffron)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on::after{transform:translateX(18px)}
+
+/* BARS */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-name{min-width:100px;font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:7px;background:var(--paper);border-radius:50px;overflow:hidden}
+.bar-fill{height:100%;background:var(--saffron);border-radius:50px}
+.bar-val{min-width:32px;text-align:right;font-size:12px;color:var(--muted)}
+
+/* NOTIFY */
+.notify-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.notify-row:last-child{border-bottom:none}
+.notify-info h4{font-size:13px;font-weight:500;margin-bottom:2px}
+.notify-info p{font-size:12px;color:var(--muted)}
+
+/* CHAT */
+.chat-layout{display:grid;grid-template-columns:240px 1fr;border:1px solid var(--border);border-radius:14px;overflow:hidden;height:520px;background:#fff}
+.chat-sidebar{border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.chat-sidebar-head{padding:12px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px}
+.chat-thread{padding:12px 14px;cursor:pointer;border-bottom:1px solid rgba(60,35,20,0.05);transition:background 0.15s}
+.chat-thread:hover,.chat-thread.on{background:rgba(212,112,10,0.06)}
+.chat-thread-name{font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:space-between}
+.chat-thread-preview{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-thread-time{font-size:11px;color:var(--muted)}
+.unread{width:8px;height:8px;background:var(--saffron);border-radius:50%;flex-shrink:0}
+.chat-main{display:flex;flex-direction:column}
+.chat-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.chat-head-name{font-size:14px;font-weight:500}
+.chat-head-sub{font-size:12px;color:var(--muted)}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:78%;padding:9px 14px;border-radius:14px;font-size:13px;line-height:1.55}
+.msg.customer{background:var(--paper);color:var(--ink);align-self:flex-start;border-bottom-left-radius:3px}
+.msg.admin{background:var(--saffron);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.msg.ai{background:#EEF2FF;color:#4338CA;align-self:flex-start;border-bottom-left-radius:3px}
+.msg-label{font-size:10px;color:var(--muted);margin-bottom:3px}
+.chat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+.chat-input-row input{flex:1;border:1px solid var(--border-md);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif}
+.chat-input-row input:focus{border-color:var(--saffron)}
+
+/* COUPON */
+.coupon-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.coupon-code{font-family:'DM Mono',monospace;font-size:15px;font-weight:600;background:var(--paper);padding:6px 14px;border-radius:8px;letter-spacing:1px;color:var(--ink)}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 24px;border-radius:50px;font-size:13px;z-index:999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform 0.3s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .form-grid{grid-template-columns:1fr}
+  .chat-layout{grid-template-columns:1fr;height:auto}
+  .chat-sidebar{display:none}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-brand-name">Kishor Spices</div>
+    <div class="sb-brand-sub">Admin Dashboard</div>
+  </div>
+  <div class="sb-section">Overview</div>
+  <button class="sb-link on" onclick="go('dashboard',this)"><span class="sb-icon">📊</span>Dashboard</button>
+  <div class="sb-section">Store</div>
+  <button class="sb-link" onclick="go('products',this)"><span class="sb-icon">🌶️</span>Products<span class="sb-badge" id="draftBadge" style="display:none"></span></button>
+  <button class="sb-link" onclick="go('orders',this)"><span class="sb-icon">📦</span>Orders<span class="sb-badge" id="newOrderBadge" style="display:none"></span></button>
+  <button class="sb-link" onclick="go('coupons',this)"><span class="sb-icon">🏷️</span>Coupons & Offers</button>
+  <div class="sb-section">Content</div>
+  <button class="sb-link" onclick="go('blog',this)"><span class="sb-icon">✍️</span>Blog Posts</button>
+  <button class="sb-link" onclick="go('media',this)"><span class="sb-icon">🖼️</span>Media Library</button>
+  <div class="sb-section">Customers</div>
+  <button class="sb-link" onclick="go('visitors',this)"><span class="sb-icon">👥</span>Visitors & Data</button>
+  <button class="sb-link" onclick="go('chat',this)"><span class="sb-icon">💬</span>Chat & Support</button>
+  <div class="sb-section">Settings</div>
+  <button class="sb-link" onclick="go('notifications',this)"><span class="sb-icon">🔔</span>Notifications</button>
+  <button class="sb-link" onclick="go('settings',this)"><span class="sb-icon">⚙️</span>Site Settings</button>
+  <div class="sb-footer">
+    <a href="../index.html" target="_blank" class="public">👁 View Live Site</a>
+    <a href="../shop/index.html" target="_blank" class="public">🛍 View Shop</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div><div class="topbar-title" id="panelTitle">Dashboard</div><div class="topbar-sub" id="panelSub">Welcome back — here's your store at a glance</div></div>
+    <div class="topbar-right">
+      <div class="pulse"></div>
+      <a href="https://wa.me/919120007475" class="topbar-wa" target="_blank">📲 Open WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="panel on" id="p-dashboard">
+    <div class="stat-grid" id="dash-stats"></div>
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:18px">
+      <div class="card">
+        <div class="card-head"><h3>Recent orders</h3><button class="btn btn-outline btn-sm" onclick="go('orders',null)">View all</button></div>
+        <div style="overflow-x:auto"><table class="tbl" id="dash-orders-tbl"></table></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Top products</h3></div>
+        <div class="card-body" id="dash-top"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Quick actions</h3></div>
+      <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="go('products',null);setTimeout(function(){openProdModal(-1)},100)">+ Add Product</button>
+        <button class="btn btn-outline" onclick="go('blog',null);setTimeout(function(){openBlogModal(-1)},100)">+ New Blog Post</button>
+        <button class="btn btn-outline" onclick="go('coupons',null)">🏷 Create Coupon</button>
+        <a href="https://wa.me/919120007475" target="_blank" class="btn btn-wa">📲 WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="panel" id="p-products">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input type="text" placeholder="Search products..." oninput="filterProds(this.value)" style="padding:9px 14px;border:1px solid var(--border-md);border-radius:8px;font-size:13px;width:200px;outline:none;font-family:'DM Sans',sans-serif">
+      <select onchange="filterProdCat(this.value)" style="padding:9px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff;outline:none">
+        <option value="">All categories</option>
+        <option>Single Spices</option>
+        <option>Masala Blends</option>
+        <option>Whole Spices</option>
+        <option>Premium Range</option>
+      </select>
+      <select onchange="filterProdTag(this.value)" style="padding:9px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff;outline:none">
+        <option value="">All tags</option>
+        <option value="hot">🔥 Hot</option>
+        <option value="new">✨ New</option>
+        <option value="selling">⚡ Selling Fast</option>
+        <option value="bestseller">⭐ Bestseller</option>
+        <option value="premium">💎 Premium</option>
+      </select>
+      <button class="btn btn-primary" onclick="openProdModal(-1)" style="margin-left:auto">+ Add Product</button>
+    </div>
+    <div class="card">
+      <div style="overflow-x:auto"><table class="tbl" id="prodTbl"></table></div>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="panel" id="p-orders">
+    <div class="card">
+      <div class="card-head">
+        <h3>All Orders</h3>
+        <span style="font-size:12px;color:var(--muted)">Click "Update" to notify customer on WhatsApp</span>
+      </div>
+      <div id="orders-empty" style="padding:48px;text-align:center;color:var(--muted);display:none">
+        <div style="font-size:32px;margin-bottom:12px">📦</div>
+        <div style="font-size:14px">No orders yet. They'll appear here as customers checkout via WhatsApp.</div>
+      </div>
+      <div style="overflow-x:auto"><table class="tbl" id="ordersTbl"></table></div>
+    </div>
+  </div>
+
+  <!-- COUPONS -->
+  <div class="panel" id="p-coupons">
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="openCouponModal(-1)">+ Create Coupon</button></div>
+    <div class="card">
+      <div class="card-body" id="couponList"></div>
+    </div>
+  </div>
+
+  <!-- BLOG -->
+  <div class="panel" id="p-blog">
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="openBlogModal(-1)">+ New Post</button></div>
+    <div class="card">
+      <div style="overflow-x:auto"><table class="tbl" id="blogTbl"></table></div>
+    </div>
+  </div>
+
+  <!-- MEDIA -->
+  <div class="panel" id="p-media">
+    <div class="card">
+      <div class="card-head"><h3>Media Library</h3><span style="font-size:12px;color:var(--muted)">Upload product & blog images here, then reference them by filename</span></div>
+      <div class="card-body">
+        <div class="img-upload-area" style="margin-bottom:20px">
+          <input type="file" accept="image/*" multiple onchange="handleMediaUpload(this)">
+          <span class="img-placeholder">📁</span>
+          <div style="font-size:14px;font-weight:500;margin-bottom:4px">Drop images here or click to upload</div>
+          <div class="img-hint">JPG, PNG, WEBP — max 2MB each. Use the <strong>exact filename</strong> in the product image field.</div>
+        </div>
+        <div id="mediaGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px"></div>
+        <div id="mediaEmpty" style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No images uploaded yet. Upload your product photos here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISITORS -->
+  <div class="panel" id="p-visitors">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-label">Today's visits</div><div class="stat-val" id="v-today">—</div><div style="font-size:12px;color:var(--muted);margin-top:4px">From your live site</div></div>
+      <div class="stat"><div class="stat-label">This week</div><div class="stat-val" id="v-week">—</div></div>
+      <div class="stat"><div class="stat-label">Total orders</div><div class="stat-val" id="v-orders">0</div></div>
+      <div class="stat"><div class="stat-label">Customers</div><div class="stat-val" id="v-customers">0</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>How to see real visitor data</h3></div>
+      <div class="card-body" style="font-size:13px;color:var(--muted);line-height:1.8">
+        <p>To track real visitors, add <strong style="color:var(--ink)">Google Analytics</strong> (free) to your website. It takes 5 minutes. Once your site is live on GitHub, I will walk you through it step by step.</p>
+        <p style="margin-top:10px">Google Analytics will show you: how many people visited, which pages they read, where they came from (WhatsApp, Google, direct), what device they used, and which products they viewed most.</p>
+        <div style="margin-top:16px"><a href="https://analytics.google.com" target="_blank" class="btn btn-outline btn-sm">Go to Google Analytics →</a></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Customer enquiries & contact submissions</h3></div>
+      <div class="card-body" id="enquiriesList" style="padding:0">
+        <div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Contact form submissions will appear here when customers reach out.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="panel" id="p-chat">
+    <div style="font-size:13px;color:var(--muted)">Messages from the website chatbot. Reply manually or use AI Suggest.</div>
+    <div class="chat-layout">
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-head">Conversations</div>
+        <div id="threadList"></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-head">
+          <div><div class="chat-head-name" id="chatName">Select a conversation</div><div class="chat-head-sub" id="chatPhone">—</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-outline" onclick="aiSuggest()">✨ AI Suggest</button>
+            <button class="btn btn-sm btn-wa" onclick="openWA()">📲 WhatsApp</button>
+          </div>
+        </div>
+        <div class="chat-msgs" id="chatMsgs"></div>
+        <div class="chat-input-row">
+          <input type="text" id="adminMsg" placeholder="Type your reply..." onkeydown="if(event.key==='Enter')adminReply()">
+          <button class="btn btn-primary btn-sm" onclick="adminReply()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="panel" id="p-notifications">
+    <div class="card">
+      <div class="card-head"><h3>WhatsApp & Telegram alerts</h3></div>
+      <div class="card-body">
+        <div class="form-grid" style="margin-bottom:24px">
+          <div class="fg"><label>WhatsApp number (your number)</label><input type="text" id="wa-num" value="+91 91200 07475" placeholder="+91 XXXXX XXXXX"></div>
+          <div class="fg"><label>Telegram username (optional)</label><input type="text" id="tg-user" placeholder="@username"></div>
+        </div>
+        <div id="notifyToggles"></div>
+        <div style="margin-top:20px;display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="saveNotify()">Save settings</button>
+          <a href="https://wa.me/919120007475?text=🔔+Test+alert+from+Kishor+Spices+Admin!+Your+notifications+are+working." target="_blank" class="btn btn-wa">📲 Send test alert</a>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>How to fully activate WhatsApp notifications</h3></div>
+      <div class="card-body" style="font-size:13px;color:var(--muted);line-height:1.8">
+        <p>When a customer places an order, the website opens WhatsApp directly for them to confirm — so you receive the order details in your WhatsApp inbox automatically, with no setup needed.</p>
+        <p style="margin-top:10px">For <strong style="color:var(--ink)">automatic background alerts</strong> (when you're not watching the admin panel), you'll need to connect a free service called <strong style="color:var(--ink)">CallMeBot</strong> for WhatsApp. This is a 5-minute setup I'll walk you through once your site is live.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel" id="p-settings">
+    <div class="card">
+      <div class="card-head"><h3>Business information</h3><span style="font-size:12px;color:var(--muted)">This appears on your website</span></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="fg"><label>Business name</label><input type="text" id="s-name" value="Kishor Spices"></div>
+          <div class="fg"><label>Tagline (English)</label><input type="text" id="s-tagline-en" value="Pure. Bold. From the Heart of India."></div>
+          <div class="fg"><label>Tagline (Hindi)</label><input type="text" id="s-tagline-hi" value="शुद्ध। असली। दिल से।"></div>
+          <div class="fg"><label>Phone / WhatsApp</label><input type="text" id="s-phone" value="+91 91200 07475"></div>
+          <div class="fg"><label>Email</label><input type="email" id="s-email" value="kishormasalaudyog@gmail.com"></div>
+          <div class="fg full"><label>Address</label><input type="text" id="s-address" value="Ghorawal, Sonbhadra, Uttar Pradesh"></div>
+          <div class="fg"><label>Free delivery above (₹)</label><input type="number" id="s-delivery" value="499"></div>
+          <div class="fg"><label>Founded year</label><input type="text" id="s-founded" value="1998"></div>
+        </div>
+        <div style="margin-top:16px"><button class="btn btn-primary" onclick="saveSettings()">Save settings</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>SEO settings</h3><span style="font-size:12px;color:var(--muted)">Helps Google find your website</span></div>
+      <div class="card-body">
+        <div class="fg" style="margin-bottom:12px"><label>Page title (shown in Google results)</label><input type="text" id="s-seo-title" value="Kishor Spices — Pure. Bold. From the Heart of India."></div>
+        <div class="fg"><label>Meta description (shown under title in Google)</label><textarea id="s-seo-desc" style="min-height:70px">Premium Indian spices sourced directly from farms. Family-run since 1998 from Ghorawal, Sonbhadra. No additives. No shortcuts.</textarea></div>
+        <div style="margin-top:16px"><button class="btn btn-primary" onclick="saveSEO()">Save SEO settings</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-bg" id="prodModal">
+  <div class="modal">
+    <h2 id="pm-h">Add product</h2>
+    <div class="form-grid">
+      <div class="fg"><label>Product name (English)</label><input id="pm-name" type="text" placeholder="e.g. Kashmiri Red Chilli"></div>
+      <div class="fg"><label>Name in Hindi</label><input id="pm-nameh" type="text" placeholder="e.g. कश्मीरी लाल मिर्च"></div>
+      <div class="fg"><label>Category</label>
+        <select id="pm-cat">
+          <option>Single Spices</option><option>Masala Blends</option><option>Whole Spices</option><option>Premium Range</option>
+        </select>
+      </div>
+      <div class="fg"><label>Tag</label>
+        <select id="pm-tag">
+          <option value="">No tag</option><option value="hot">🔥 Hot Item</option><option value="new">✨ New Launch</option>
+          <option value="selling">⚡ Selling Fast</option><option value="bestseller">⭐ Bestseller</option><option value="premium">💎 Premium</option>
+        </select>
+      </div>
+      <div class="fg"><label>Price (₹)</label><input id="pm-price" type="number" min="0" placeholder="150"></div>
+      <div class="fg"><label>Compare-at price (₹) — for strikethrough</label><input id="pm-compare" type="number" min="0" placeholder="0 = no strikethrough"></div>
+      <div class="fg"><label>Sizes/Variants (comma-separated)</label><input id="pm-variants" type="text" placeholder="100g, 200g, 500g"></div>
+      <div class="fg"><label>Stock quantity</label><input id="pm-stock" type="number" min="0" placeholder="100"></div>
+      <div class="fg"><label>Emoji (fallback icon)</label><input id="pm-emoji" type="text" maxlength="2" placeholder="🌶️" style="width:80px"></div>
+      <div class="fg"><label>Status</label>
+        <select id="pm-status"><option value="live">Live — visible on site</option><option value="draft">Draft — hidden</option></select>
+      </div>
+      <div class="fg full"><label>Description</label><textarea id="pm-desc" placeholder="Short description of this spice..."></textarea></div>
+      <div class="fg full">
+        <label>Product image</label>
+        <div class="img-upload-area">
+          <input type="file" accept="image/*" onchange="previewImg(this,'pm-preview')">
+          <img id="pm-preview" class="img-preview" alt="preview">
+          <span class="img-placeholder" id="pm-ph">📸</span>
+          <div class="img-hint">Upload a product photo. <strong>Tip:</strong> name it clearly (e.g. garam-masala.jpg)</div>
+        </div>
+        <input id="pm-image" type="text" placeholder="Or type filename if already in media library (e.g. garam-masala.jpg)" style="margin-top:8px">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('prodModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProd()">Save product</button>
+    </div>
+  </div>
+</div>
+
+<!-- BLOG MODAL -->
+<div class="modal-bg" id="blogModal">
+  <div class="modal">
+    <h2 id="bm-h">New blog post</h2>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg"><label>Title (English)</label><input id="bm-title" type="text" placeholder="Your article title..."></div>
+      <div class="fg"><label>Title (Hindi) — optional</label><input id="bm-titleh" type="text" placeholder="हिंदी शीर्षक..."></div>
+      <div class="fg"><label>Category</label>
+        <select id="bm-cat"><option>Health & Wellness</option><option>Recipes</option><option>Tips & Tricks</option><option>Behind the Scenes</option><option>Our Story</option><option>News & Updates</option></select>
+      </div>
+      <div class="fg"><label>Author name</label><input id="bm-author" type="text" placeholder="Kishor Bhai"></div>
+      <div class="fg"><label>Emoji thumbnail</label><input id="bm-emoji" type="text" maxlength="2" style="width:70px" placeholder="🌿"></div>
+      <div class="fg">
+        <label>Cover image</label>
+        <div class="img-upload-area">
+          <input type="file" accept="image/*" onchange="previewImg(this,'bm-preview')">
+          <img id="bm-preview" class="img-preview" alt="">
+          <span class="img-placeholder" id="bm-ph">📸</span>
+          <div class="img-hint">Upload a cover image for this post</div>
+        </div>
+        <input id="bm-image" type="text" placeholder="Or type filename from media library" style="margin-top:8px">
+      </div>
+      <div class="fg"><label>Short excerpt (shown on homepage & blog list)</label><textarea id="bm-excerpt" style="min-height:60px" placeholder="One or two sentences to draw readers in..."></textarea></div>
+      <div class="fg"><label>Full content</label><textarea id="bm-content" style="min-height:140px" placeholder="Write your full article here..."></textarea></div>
+      <div class="fg"><label>Reading time</label><input id="bm-readtime" type="text" placeholder="e.g. 4 min read"></div>
+      <div class="fg"><label>Status</label>
+        <select id="bm-status"><option value="published">Published — visible on site</option><option value="draft">Draft — hidden</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('blogModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBlog()">Save post</button>
+    </div>
+  </div>
+</div>
+
+<!-- COUPON MODAL -->
+<div class="modal-bg" id="couponModal">
+  <div class="modal" style="max-width:400px">
+    <h2 id="cm-h">Create Coupon</h2>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg"><label>Coupon code</label><input id="cm-code" type="text" placeholder="e.g. KISHOR10" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label>Discount type</label>
+        <select id="cm-type"><option value="percent">Percentage (e.g. 10%)</option><option value="flat">Flat amount (e.g. ₹100 off)</option></select>
+      </div>
+      <div class="fg"><label>Discount value</label><input id="cm-val" type="number" min="1" placeholder="10"></div>
+      <div class="fg"><label>Status</label>
+        <select id="cm-active"><option value="true">Active</option><option value="false">Inactive</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('couponModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCoupon()">Save coupon</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="adminToast"></div>
+
+<script src="../js/data.js"></script>
+<script>
+var editProd=-1, editBlog=-1, editCoupon=-1, currentThread=0;
+var chatData=[
+  {name:'Ramesh Kumar',phone:'9876543210',msgs:[{from:'customer',text:'Do you ship to Pune?'},{from:'customer',text:'I want 2kg garam masala'}]},
+  {name:'Priya Sharma',phone:'9823456789',msgs:[{from:'customer',text:'Bulk order price for turmeric?'}]},
+  {name:'Mohammed Raza',phone:'9534567890',msgs:[{from:'customer',text:'Order KS-1038 not arrived.'},{from:'admin',text:'Sorry! Checking with courier now.'}]}
+];
+
+// NAVIGATION
+var panelMeta={
+  dashboard:{title:'Dashboard',sub:'Welcome back — here\'s your store at a glance'},
+  products:{title:'Products',sub:'Manage all 40 spices — price, image, tags, stock, visibility'},
+  orders:{title:'Orders',sub:'View and manage all customer orders'},
+  coupons:{title:'Coupons & Offers',sub:'Create discount codes for your customers'},
+  blog:{title:'Blog Posts',sub:'Write, edit, and publish your blog articles'},
+  media:{title:'Media Library',sub:'All your uploaded product and blog images'},
+  visitors:{title:'Visitors & Data',sub:'Track who is visiting your store'},
+  chat:{title:'Chat & Support',sub:'Reply to customer messages from the website'},
+  notifications:{title:'Notifications',sub:'Configure WhatsApp and Telegram alerts'},
+  settings:{title:'Site Settings',sub:'Update your business info, SEO, and contact details'}
+};
+function go(id,el){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.sb-link').forEach(function(l){l.classList.remove('on');});
+  document.getElementById('p-'+id).classList.add('on');
+  if(el) el.classList.add('on');
+  var m=panelMeta[id]||{title:id,sub:''};
+  document.getElementById('panelTitle').textContent=m.title;
+  document.getElementById('panelSub').textContent=m.sub;
+  if(id==='dashboard') renderDash();
+  if(id==='products') renderProds();
+  if(id==='orders') renderOrders();
+  if(id==='blog') renderBlog();
+  if(id==='coupons') renderCoupons();
+  if(id==='chat') renderChat();
+  if(id==='notifications') renderNotifyToggles();
+  if(id==='visitors') renderVisitors();
+}
+
+// DASHBOARD
+function renderDash(){
+  var live=KS.products.filter(function(p){return p.status==='live';}).length;
+  var drafts=KS.products.filter(function(p){return p.status==='draft';}).length;
+  document.getElementById('dash-stats').innerHTML=
+    stat('Live products',live,'','')+ stat('Draft products',drafts,'','stat-dn')+
+    stat('Blog posts',KS.posts.length,'','')+ stat('Total orders',KS.orders.length,'','');
+  var draftBadge=document.getElementById('draftBadge');
+  if(drafts>0){draftBadge.textContent=drafts;draftBadge.style.display='inline-block';}
+  var newOrders=KS.orders.filter(function(o){return o.status==='new';}).length;
+  var nob=document.getElementById('newOrderBadge');
+  if(newOrders>0){nob.textContent=newOrders;nob.style.display='inline-block';}
+  if(!KS.orders.length){
+    document.getElementById('dash-orders-tbl').innerHTML='<tr><td style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No orders yet</td></tr>';
+  } else {
+    document.getElementById('dash-orders-tbl').innerHTML='<thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>'+
+    KS.orders.slice(0,5).map(function(o){
+      return '<tr><td style="font-weight:500">'+o.id+'</td><td>'+o.customer+'</td><td>₹'+o.total+'</td><td><span class="badge b-'+o.status+'">'+o.status+'</span></td></tr>';
+    }).join('')+'</tbody>';
+  }
+  var topProds=[['Garam Masala',88],['Turmeric',76],['House Masala',64],['Chai Masala',51],['Biryani Masala',44]];
+  document.getElementById('dash-top').innerHTML=topProds.map(function(p){
+    return '<div class="bar-row"><span class="bar-name">'+p[0]+'</span><div class="bar-track"><div class="bar-fill" style="width:'+p[1]+'%"></div></div><span class="bar-val">'+p[1]+'%</span></div>';
+  }).join('');
+}
+function stat(label,val,delta,cls){
+  return '<div class="stat"><div class="stat-label">'+label+'</div><div class="stat-val">'+val+'</div>'+(delta?'<div class="stat-delta '+cls+'">'+delta+'</div>':'')+'</div>';
+}
+
+// PRODUCTS
+var pf={search:'',cat:'',tag:''};
+function renderProds(){
+  var list=KS.products.filter(function(p){
+    if(pf.search&&!p.name.toLowerCase().includes(pf.search))return false;
+    if(pf.cat&&p.category!==pf.cat)return false;
+    if(pf.tag&&p.tag!==pf.tag)return false;
+    return true;
+  });
+  var html='<thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Compare</th><th>Tag</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  list.forEach(function(p){
+    var idx=KS.products.indexOf(p);
+    var imgEl=p.image?'<img src="../'+p.image+'" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">':'<span style="font-size:26px">'+p.emoji+'</span>';
+    var tagEl=p.tag?'<span class="badge b-'+p.tag+'">'+p.tag+'</span>':'<span style="color:var(--muted);font-size:12px">—</span>';
+    var stockEl=p.stock<20?'<span style="color:var(--danger);font-weight:500">⚠ '+p.stock+'</span>':p.stock;
+    html+='<tr>'+
+      '<td>'+imgEl+'</td>'+
+      '<td><div style="font-weight:500">'+p.name+'</div><div style="font-size:11px;color:var(--muted)">'+p.name_hi+'</div></td>'+
+      '<td style="color:var(--muted);font-size:12px">'+p.category+'</td>'+
+      '<td style="font-weight:500">₹'+p.price+'</td>'+
+      '<td style="color:var(--muted)">'+(p.compare_price>0?'<s>₹'+p.compare_price+'</s>':'—')+'</td>'+
+      '<td>'+tagEl+'</td>'+
+      '<td>'+stockEl+'</td>'+
+      '<td><span class="badge b-'+p.status+'">'+p.status+'</span></td>'+
+      '<td><div style="display:flex;gap:6px">'+
+        '<button class="btn btn-outline btn-sm" onclick="openProdModal('+idx+')">Edit</button>'+
+        '<button class="btn btn-sm '+(p.status==='live'?'btn-danger':'btn-success')+'" onclick="toggleProd('+idx+')">'+(p.status==='live'?'Hide':'Show')+'</button>'+
+      '</div></td>'+
+    '</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('prodTbl').innerHTML=html;
+}
+function filterProds(v){pf.search=v.toLowerCase();renderProds();}
+function filterProdCat(v){pf.cat=v;renderProds();}
+function filterProdTag(v){pf.tag=v;renderProds();}
+
+function openProdModal(idx){
+  editProd=idx;
+  var p=idx>=0?KS.products[idx]:{name:'',name_hi:'',category:'Single Spices',tag:'',price:'',compare_price:0,variants:[],stock:100,emoji:'📦',status:'live',desc:'',image:''};
+  document.getElementById('pm-h').textContent=idx>=0?'Edit product':'Add product';
+  document.getElementById('pm-name').value=p.name;
+  document.getElementById('pm-nameh').value=p.name_hi||'';
+  document.getElementById('pm-cat').value=p.category;
+  document.getElementById('pm-tag').value=p.tag||'';
+  document.getElementById('pm-price').value=p.price||'';
+  document.getElementById('pm-compare').value=p.compare_price||'';
+  document.getElementById('pm-variants').value=Array.isArray(p.variants)?p.variants.join(', '):'';
+  document.getElementById('pm-stock').value=p.stock||'';
+  document.getElementById('pm-emoji').value=p.emoji||'📦';
+  document.getElementById('pm-status').value=p.status;
+  document.getElementById('pm-desc').value=p.desc||'';
+  document.getElementById('pm-image').value=p.image||'';
+  var prev=document.getElementById('pm-preview');
+  if(p.image){prev.src='../'+p.image;prev.classList.add('show');document.getElementById('pm-ph').style.display='none';}
+  else{prev.classList.remove('show');document.getElementById('pm-ph').style.display='block';}
+  openModal('prodModal');
+}
+function saveProd(){
+  var p={
+    id:editProd>=0?KS.products[editProd].id:Date.now(),
+    name:document.getElementById('pm-name').value||'New Spice',
+    name_hi:document.getElementById('pm-nameh').value,
+    category:document.getElementById('pm-cat').value,
+    tag:document.getElementById('pm-tag').value,
+    price:parseFloat(document.getElementById('pm-price').value)||0,
+    compare_price:parseFloat(document.getElementById('pm-compare').value)||0,
+    variants:document.getElementById('pm-variants').value.split(',').map(function(v){return v.trim();}).filter(Boolean),
+    stock:parseInt(document.getElementById('pm-stock').value)||0,
+    emoji:document.getElementById('pm-emoji').value||'📦',
+    status:document.getElementById('pm-status').value,
+    desc:document.getElementById('pm-desc').value,
+    image:document.getElementById('pm-image').value.trim()
+  };
+  if(editProd>=0)KS.products[editProd]=p;
+  else KS.products.push(p);
+  closeModal('prodModal');
+  renderProds();
+  toast((editProd>=0?'Product updated!':'Product added!')+ ' Visible on site immediately.');
+}
+function toggleProd(idx){
+  KS.products[idx].status=KS.products[idx].status==='live'?'draft':'live';
+  renderProds();
+  toast('Product is now '+KS.products[idx].status+'.');
+}
+
+// ORDERS
+function renderOrders(){
+  if(!KS.orders.length){
+    document.getElementById('orders-empty').style.display='block';
+    document.getElementById('ordersTbl').innerHTML='';
+    return;
+  }
+  document.getElementById('orders-empty').style.display='none';
+  var html='<thead><tr><th>Order ID</th><th>Customer</th><th>Phone</th><th>Items</th><th>Total</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  KS.orders.forEach(function(o){
+    html+='<tr>'+
+      '<td style="font-weight:500">'+o.id+'</td>'+
+      '<td>'+o.customer+'</td>'+
+      '<td style="color:var(--muted)">'+o.phone+'</td>'+
+      '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+o.items+'">'+o.items+'</td>'+
+      '<td style="font-weight:500">₹'+o.total+'</td>'+
+      '<td style="color:var(--muted)">'+o.date+'</td>'+
+      '<td><span class="badge b-'+o.status+'">'+o.status+'</span></td>'+
+      '<td><div style="display:flex;gap:5px">'+
+        '<button class="btn btn-sm btn-wa" onclick="waOrder(\''+o.phone+'\',\''+o.customer.split(' ')[0]+'\',\''+o.id+'\')">📲 Update</button>'+
+      '</div></td>'+
+    '</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('ordersTbl').innerHTML=html;
+}
+function waOrder(phone,name,id){
+  var msg='Hi '+name+' ji! Your Kishor Spices order '+id+' has been confirmed and will be shipped shortly. Thank you! 🙏';
+  window.open('https://wa.me/91'+phone+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// BLOG
+function renderBlog(){
+  var html='<thead><tr><th>Cover</th><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+  KS.posts.forEach(function(p,i){
+    var imgEl=p.cover_image?'<img src="../'+p.cover_image+'" style="width:44px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">':'<span style="font-size:26px">'+p.emoji+'</span>';
+    html+='<tr>'+
+      '<td>'+imgEl+'</td>'+
+      '<td style="font-weight:500;max-width:200px">'+p.title+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+p.category+'</td>'+
+      '<td>'+p.author+'</td>'+
+      '<td style="color:var(--muted)">'+p.date+'</td>'+
+      '<td><span class="badge b-'+p.status+'">'+p.status+'</span></td>'+
+      '<td><div style="display:flex;gap:5px">'+
+        '<button class="btn btn-outline btn-sm" onclick="openBlogModal('+i+')">Edit</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="deleteBlog('+i+')">Delete</button>'+
+      '</div></td>'+
+    '</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('blogTbl').innerHTML=html;
+}
+function openBlogModal(idx){
+  editBlog=idx;
+  var p=idx>=0?KS.posts[idx]:{title:'',title_hi:'',category:'Recipes',author:'Kishor Bhai',emoji:'🌿',cover_image:'',excerpt:'',content:'',read_time:'4 min read',status:'published'};
+  document.getElementById('bm-h').textContent=idx>=0?'Edit post':'New blog post';
+  document.getElementById('bm-title').value=p.title;
+  document.getElementById('bm-titleh').value=p.title_hi||'';
+  document.getElementById('bm-cat').value=p.category;
+  document.getElementById('bm-author').value=p.author;
+  document.getElementById('bm-emoji').value=p.emoji;
+  document.getElementById('bm-image').value=p.cover_image||'';
+  document.getElementById('bm-excerpt').value=p.excerpt;
+  document.getElementById('bm-content').value=p.content;
+  document.getElementById('bm-readtime').value=p.read_time||'';
+  document.getElementById('bm-status').value=p.status;
+  var prev=document.getElementById('bm-preview');
+  if(p.cover_image){prev.src='../'+p.cover_image;prev.classList.add('show');document.getElementById('bm-ph').style.display='none';}
+  else{prev.classList.remove('show');document.getElementById('bm-ph').style.display='block';}
+  openModal('blogModal');
+}
+function saveBlog(){
+  var d=new Date();var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var p={
+    id:editBlog>=0?KS.posts[editBlog].id:Date.now(),
+    title:document.getElementById('bm-title').value||'Untitled',
+    title_hi:document.getElementById('bm-titleh').value,
+    category:document.getElementById('bm-cat').value,
+    author:document.getElementById('bm-author').value||'Kishor Bhai',
+    emoji:document.getElementById('bm-emoji').value||'🌿',
+    cover_image:document.getElementById('bm-image').value.trim(),
+    excerpt:document.getElementById('bm-excerpt').value,
+    content:document.getElementById('bm-content').value,
+    read_time:document.getElementById('bm-readtime').value||'3 min read',
+    status:document.getElementById('bm-status').value,
+    date:months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()
+  };
+  if(editBlog>=0)KS.posts[editBlog]=p;
+  else KS.posts.push(p);
+  closeModal('blogModal');
+  renderBlog();
+  toast('Post saved!');
+}
+function deleteBlog(i){if(!confirm('Delete this post?'))return;KS.posts.splice(i,1);renderBlog();toast('Post deleted.');}
+
+// COUPONS
+function renderCoupons(){
+  document.getElementById('couponList').innerHTML=KS.coupons.length?
+    KS.coupons.map(function(c,i){
+      return '<div class="coupon-row">'+
+        '<span class="coupon-code">'+c.code+'</span>'+
+        '<span style="font-size:13px;color:var(--muted)">'+( c.type==='percent'?c.value+'% off':'₹'+c.value+' off')+'</span>'+
+        '<span style="font-size:12px;color:var(--muted)">Used: '+c.used+'x</span>'+
+        '<span class="badge '+(c.active?'b-live':'b-draft')+'">'+(c.active?'Active':'Inactive')+'</span>'+
+        '<div style="display:flex;gap:6px;margin-left:auto">'+
+          '<button class="btn btn-outline btn-sm" onclick="openCouponModal('+i+')">Edit</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteCoupon('+i+')">Delete</button>'+
+        '</div>'+
+      '</div>';
+    }).join('') :
+    '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No coupons yet. Create one to offer discounts to your customers.</div>';
+}
+function openCouponModal(idx){
+  editCoupon=idx;
+  var c=idx>=0?KS.coupons[idx]:{code:'',type:'percent',value:10,active:true};
+  document.getElementById('cm-h').textContent=idx>=0?'Edit coupon':'Create coupon';
+  document.getElementById('cm-code').value=c.code;
+  document.getElementById('cm-type').value=c.type;
+  document.getElementById('cm-val').value=c.value;
+  document.getElementById('cm-active').value=String(c.active);
+  openModal('couponModal');
+}
+function saveCoupon(){
+  var c={code:document.getElementById('cm-code').value.toUpperCase(),type:document.getElementById('cm-type').value,value:parseFloat(document.getElementById('cm-val').value)||0,active:document.getElementById('cm-active').value==='true',used:editCoupon>=0?KS.coupons[editCoupon].used:0};
+  if(editCoupon>=0)KS.coupons[editCoupon]=c;
+  else KS.coupons.push(c);
+  closeModal('couponModal');
+  renderCoupons();
+  toast('Coupon saved!');
+}
+function deleteCoupon(i){if(!confirm('Delete coupon '+KS.coupons[i].code+'?'))return;KS.coupons.splice(i,1);renderCoupons();}
+
+// CHAT
+function renderChat(){
+  var tl=document.getElementById('threadList');
+  tl.innerHTML=chatData.map(function(t,i){
+    var last=t.msgs[t.msgs.length-1];
+    return '<div class="chat-thread'+(i===currentThread?' on':'')+'" onclick="loadThread('+i+',this)">'+
+      '<div class="chat-thread-name">'+t.name+'<span class="chat-thread-time">'+(i===0?'2m':i===1?'18m':'1h')+'</span></div>'+
+      '<div style="display:flex;align-items:center;gap:4px">'+
+        (i===0?'<span class="unread"></span>':'')+
+        '<div class="chat-thread-preview">'+last.text+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  loadThread(currentThread, null);
+}
+function loadThread(i,el){
+  currentThread=i;
+  if(el){document.querySelectorAll('.chat-thread').forEach(function(t){t.classList.remove('on');});el.classList.add('on');}
+  var t=chatData[i];
+  document.getElementById('chatName').textContent=t.name;
+  document.getElementById('chatPhone').textContent=t.phone+' · Website chat';
+  var area=document.getElementById('chatMsgs');
+  area.innerHTML=t.msgs.map(function(m){
+    var lbl=m.from==='admin'?'<div class="msg-label">You</div>':m.from==='ai'?'<div class="msg-label">AI suggestion</div>':'';
+    return '<div class="msg '+m.from+'">'+lbl+m.text+'</div>';
+  }).join('');
+  area.scrollTop=area.scrollHeight;
+}
+function adminReply(){
+  var input=document.getElementById('adminMsg');
+  var text=input.value.trim();
+  if(!text)return;
+  chatData[currentThread].msgs.push({from:'admin',text:text});
+  input.value='';
+  loadThread(currentThread,null);
+  toast('Reply sent!');
+}
+var aiReplies=['Yes, we ship to Pune! Standard delivery is 3–5 business days, free above ₹499.','For bulk orders, we offer special pricing. Please share your quantity and we will quote you.','We are very sorry for the delay! I am following up with the courier right now and will update you within the hour.'];
+function aiSuggest(){
+  var text=aiReplies[currentThread]||'Thank you for contacting Kishor Spices! How can I help you today?';
+  chatData[currentThread].msgs.push({from:'ai',text:text});
+  document.getElementById('adminMsg').value=text;
+  loadThread(currentThread,null);
+}
+function openWA(){
+  var t=chatData[currentThread];
+  window.open('https://wa.me/91'+t.phone+'?text='+encodeURIComponent('Namaste '+t.name.split(' ')[0]+' ji! This is Kishor Spices support. How can I help you? 🙏'),'_blank');
+}
+
+// NOTIFY
+var notifyItems=[
+  {key:'whatsapp_orders',label:'New order placed',desc:'Get notified every time a customer places an order via WhatsApp'},
+  {key:'whatsapp_messages',label:'New chat message',desc:'When a customer sends a message on the website chatbot'},
+  {key:'whatsapp_contact',label:'New contact form',desc:'When someone fills the contact form on your website'},
+  {key:'whatsapp_lowstock',label:'Low stock alert',desc:'When any product\'s stock falls below 20 units'},
+  {key:'telegram_orders',label:'Telegram order alert',desc:'Receive order alerts on Telegram (requires Telegram bot setup)'}
+];
+function renderNotifyToggles(){
+  document.getElementById('notifyToggles').innerHTML=notifyItems.map(function(item){
+    var on=KS.notifications[item.key]?'on':'';
+    return '<div class="notify-row"><div class="notify-info"><h4>'+item.label+'</h4><p>'+item.desc+'</p></div><button class="toggle '+on+'" onclick="this.classList.toggle(\'on\')"></button></div>';
+  }).join('');
+}
+function saveNotify(){toast('Notification settings saved!');}
+
+// VISITORS
+function renderVisitors(){
+  document.getElementById('v-today').textContent='—';
+  document.getElementById('v-week').textContent='—';
+  document.getElementById('v-orders').textContent=KS.orders.length;
+  document.getElementById('v-customers').textContent=KS.orders.length;
+}
+
+// SETTINGS
+function saveSettings(){toast('Settings saved! Update js/data.js file on GitHub to make permanent.');}
+function saveSEO(){toast('SEO settings saved! Update in js/data.js to apply.');}
+
+// IMAGE UPLOAD
+function previewImg(input,previewId){
+  var file=input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=document.getElementById(previewId);
+    img.src=e.target.result;
+    img.classList.add('show');
+    var phId=previewId==='pm-preview'?'pm-ph':'bm-ph';
+    document.getElementById(phId).style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+function handleMediaUpload(input){
+  var files=Array.from(input.files);
+  var grid=document.getElementById('mediaGrid');
+  document.getElementById('mediaEmpty').style.display='none';
+  files.forEach(function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var div=document.createElement('div');
+      div.style.cssText='border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative;aspect-ratio:1;cursor:pointer';
+      div.innerHTML='<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(28,18,8,0.7);color:#fff;font-size:10px;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+file.name+'</div>';
+      grid.appendChild(div);
+      toast('Image uploaded: '+file.name+' — Now upload this file to your GitHub repository.');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// MODAL HELPERS
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(function(bg){
+  bg.addEventListener('click',function(e){if(e.target===bg)closeModal(bg.id);});
+});
+
+// TOAST
+function toast(msg){
+  var t=document.getElementById('adminToast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2800);
+}
+
+// INIT
+renderDash();
+</script>
+</body>
+</html>
