@@ -10,101 +10,86 @@
 
 <style>
 
-:root{
-  --bg:#FAF5ED;
-  --card:#fff;
-  --text:#1C1C1C;
-  --muted:#777;
-  --accent:#E8820C;
-}
-
 body{
   margin:0;
   font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:var(--text);
+  background:#FAF5ED;
+  color:#2b2b2b;
 }
 
 /* NAV */
 nav{
   display:flex;
   justify-content:space-between;
-  padding:20px 8%;
+  padding:18px 8%;
   background:#fff;
+  border-bottom:1px solid #eee;
 }
 
 /* HERO */
 .hero{
-  padding:80px 8%;
+  padding:60px 8% 20px;
 }
 .hero h1{
   font-family:'Playfair Display';
-  font-size:56px;
+  font-size:42px;
 }
 .hero p{
-  color:var(--muted);
+  color:#666;
 }
 
 /* GRID */
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:30px;
-  padding:40px 8%;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  padding:20px 8% 60px;
 }
 
 /* CARD */
 .card{
-  background:var(--card);
-  padding:20px;
-  border-radius:16px;
-  transition:0.3s;
-  cursor:pointer;
+  background:#fff;
+  padding:18px;
+  border-radius:12px;
+  border:1px solid #eee;
+  transition:0.2s;
 }
 .card:hover{
-  transform:translateY(-10px);
-  box-shadow:0 20px 40px rgba(0,0,0,0.08);
+  transform:translateY(-4px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.05);
 }
 
 .card h3{
   font-family:'Playfair Display';
+  font-size:18px;
 }
 
 .price{
-  color:var(--accent);
+  color:#E8820C;
   font-weight:600;
-}
-
-/* POPUP */
-.popup{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
-}
-
-.popup-box{
-  background:#fff;
-  padding:30px;
-  border-radius:16px;
-  width:300px;
-}
-
-.close{
-  float:right;
-  cursor:pointer;
 }
 
 /* BUTTON */
 .btn{
-  background:var(--accent);
+  margin-top:10px;
+  background:#E8820C;
   color:#fff;
   border:none;
-  padding:10px 20px;
-  margin-top:10px;
+  padding:8px 14px;
+  border-radius:6px;
   cursor:pointer;
+}
+
+/* WHATSAPP */
+.whatsapp{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#25D366;
+  color:#fff;
+  padding:12px 16px;
+  border-radius:30px;
+  text-decoration:none;
 }
 
 </style>
@@ -118,66 +103,37 @@ nav{
 </nav>
 
 <div class="hero">
-  <h1>Our Spices</h1>
-  <p>Crafted with purity and tradition</p>
+  <h1>Our Products</h1>
+  <p>Simple, pure, and trusted spices</p>
 </div>
 
 <div class="grid" id="grid"></div>
 
-<!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-box">
-    <span class="close" onclick="closePopup()">✖</span>
-    <h2 id="pname"></h2>
-    <p id="pprice"></p>
-    <button class="btn" onclick="addCart()">Add to Cart</button>
-  </div>
-</div>
+<a href="https://wa.me/919120007475" class="whatsapp">Order</a>
 
 <script src="../js/data.js"></script>
 <script src="../js/cart.js"></script>
 
 <script>
 
-let selectedId = null;
+function loadProducts(){
+  if(!window.KS || !KS.products){
+    alert("Product data not loading");
+    return;
+  }
 
-/* LOAD */
-function load(){
   document.getElementById("grid").innerHTML =
     KS.products.map(p=>`
-      <div class="card" onclick="openPopup(${p.id})">
-        <div style="font-size:40px">${p.emoji}</div>
+      <div class="card">
+        <div style="font-size:32px">${p.emoji}</div>
         <h3>${p.name}</h3>
         <p class="price">₹${p.price}</p>
+        <button class="btn" onclick="addToCart(${p.id})">Add to Cart</button>
       </div>
     `).join('');
 }
-load();
 
-/* POPUP */
-function openPopup(id){
-  let p = KS.products.find(x=>x.id==id);
-  selectedId = id;
-
-  document.getElementById("pname").innerText = p.name;
-  document.getElementById("pprice").innerText = "₹"+p.price;
-
-  document.getElementById("popup").style.display="flex";
-}
-
-function closePopup(){
-  document.getElementById("popup").style.display="none";
-}
-
-/* ADD TO CART FIX */
-function addCart(){
-  if(typeof addToCart === "function"){
-    addToCart(selectedId);
-    alert("Added to cart");
-  }else{
-    alert("Cart not loaded");
-  }
-}
+loadProducts();
 
 </script>
 
