@@ -1,4 +1,3 @@
-
 // ============================================================
 // KISHOR SPICES — DATA STORE
 // This is the single source of truth for the entire website.
