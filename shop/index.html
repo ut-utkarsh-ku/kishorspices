@@ -6,25 +6,23 @@
 
 <title>Kishor Spices — Shop</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
 
 :root{
-  --cream:#F8F2E4;
-  --paper:#EFE5CC;
-  --white:#fff;
-  --ink:#1a140d;
-  --muted:#7a6648;
-  --saffron:#C8650A;
-  --border:rgba(0,0,0,0.08);
+  --bg:#FAF5ED;
+  --card:#fff;
+  --text:#1C1C1C;
+  --muted:#777;
+  --accent:#E8820C;
 }
 
 body{
   margin:0;
-  font-family:'DM Sans',sans-serif;
-  background:var(--cream);
-  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
 /* NAV */
@@ -34,94 +32,79 @@ nav{
   padding:20px 8%;
   background:#fff;
 }
-nav a{
-  text-decoration:none;
-  color:var(--ink);
-  margin-left:20px;
-}
 
 /* HERO */
 .hero{
   padding:80px 8%;
 }
 .hero h1{
-  font-family:'Cormorant Garamond';
+  font-family:'Playfair Display';
   font-size:56px;
 }
 .hero p{
   color:var(--muted);
 }
 
-/* LAYOUT */
-.shop{
-  display:grid;
-  grid-template-columns:220px 1fr;
-  gap:40px;
-  padding:0 8% 80px;
-}
-
-/* FILTER */
-.filter h4{
-  font-size:12px;
-  letter-spacing:2px;
-  color:var(--muted);
-}
-.filter button{
-  display:block;
-  background:none;
-  border:none;
-  padding:6px 0;
-  color:var(--muted);
-  cursor:pointer;
-}
-.filter button.active,
-.filter button:hover{
-  color:var(--saffron);
-}
-
 /* GRID */
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-  gap:24px;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:30px;
+  padding:40px 8%;
 }
 
 /* CARD */
 .card{
-  background:var(--white);
-  border-radius:18px;
-  padding:18px;
+  background:var(--card);
+  padding:20px;
+  border-radius:16px;
   transition:0.3s;
+  cursor:pointer;
 }
 .card:hover{
-  transform:translateY(-8px);
+  transform:translateY(-10px);
   box-shadow:0 20px 40px rgba(0,0,0,0.08);
 }
 
 .card h3{
-  font-family:'Cormorant Garamond';
+  font-family:'Playfair Display';
 }
 
 .price{
-  color:var(--saffron);
+  color:var(--accent);
   font-weight:600;
 }
 
-/* ANIMATION */
-.card{
-  opacity:0;
-  transform:translateY(40px);
-  animation:fadeUp 0.6s ease forwards;
-}
-@keyframes fadeUp{
-  to{opacity:1;transform:translateY(0);}
+/* POPUP */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
 
-/* MOBILE */
-@media(max-width:768px){
-  .shop{
-    grid-template-columns:1fr;
-  }
+.popup-box{
+  background:#fff;
+  padding:30px;
+  border-radius:16px;
+  width:300px;
+}
+
+.close{
+  float:right;
+  cursor:pointer;
+}
+
+/* BUTTON */
+.btn{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  padding:10px 20px;
+  margin-top:10px;
+  cursor:pointer;
 }
 
 </style>
@@ -131,29 +114,24 @@ nav a{
 
 <nav>
   <div><b>Kishor Spices</b></div>
-  <div>
-    <a href="../index.html">Home</a>
-  </div>
+  <a href="../index.html">Home</a>
 </nav>
 
 <div class="hero">
   <h1>Our Spices</h1>
-  <p>Pure. Authentic. From Sonbhadra.</p>
+  <p>Crafted with purity and tradition</p>
 </div>
 
-<div class="shop">
+<div class="grid" id="grid"></div>
 
-  <!-- FILTER -->
-  <div class="filter">
-    <h4>Category</h4>
-    <div id="catFilters"></div>
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-box">
+    <span class="close" onclick="closePopup()">✖</span>
+    <h2 id="pname"></h2>
+    <p id="pprice"></p>
+    <button class="btn" onclick="addCart()">Add to Cart</button>
   </div>
-
-  <!-- PRODUCTS -->
-  <div>
-    <div class="grid" id="shopGrid"></div>
-  </div>
-
 </div>
 
 <script src="../js/data.js"></script>
@@ -161,47 +139,45 @@ nav a{
 
 <script>
 
-/* CATEGORY FILTER */
-function renderCatFilters(){
-  var cats = ['All'].concat([...new Set(KS.products.map(p=>p.category))]);
-  document.getElementById('catFilters').innerHTML =
-    cats.map(c=>`<button onclick="setCat('${c}',this)">${c}</button>`).join('');
-}
+let selectedId = null;
 
-/* STATE */
-var currentCat = '';
-
-function setCat(cat,el){
-  currentCat = cat === 'All' ? '' : cat;
-
-  document.querySelectorAll('.filter button').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-
-  render();
-}
-
-/* RENDER */
-function render(){
-  var list = KS.products.filter(p=>p.status==='live');
-
-  if(currentCat){
-    list = list.filter(p=>p.category===currentCat);
-  }
-
-  document.getElementById('shopGrid').innerHTML =
-    list.map(p=>`
-      <div class="card">
+/* LOAD */
+function load(){
+  document.getElementById("grid").innerHTML =
+    KS.products.map(p=>`
+      <div class="card" onclick="openPopup(${p.id})">
         <div style="font-size:40px">${p.emoji}</div>
         <h3>${p.name}</h3>
         <p class="price">₹${p.price}</p>
-        <button onclick="addToCart(${p.id})">Add</button>
       </div>
     `).join('');
 }
+load();
 
-/* INIT */
-renderCatFilters();
-render();
+/* POPUP */
+function openPopup(id){
+  let p = KS.products.find(x=>x.id==id);
+  selectedId = id;
+
+  document.getElementById("pname").innerText = p.name;
+  document.getElementById("pprice").innerText = "₹"+p.price;
+
+  document.getElementById("popup").style.display="flex";
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+/* ADD TO CART FIX */
+function addCart(){
+  if(typeof addToCart === "function"){
+    addToCart(selectedId);
+    alert("Added to cart");
+  }else{
+    alert("Cart not loaded");
+  }
+}
 
 </script>
 
